@@ -2,37 +2,22 @@ package com.mygdx.hitboxcreator.views;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Cursor;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Circle;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.utils.DragScrollListener;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.hitboxcreator.App;
-import com.mygdx.hitboxcreator.utils.HitRectangle;
-import com.mygdx.hitboxcreator.utils.HitRectangle2;
-import com.mygdx.hitboxcreator.utils.MyGroup;
 
 public class Editor extends Group{
 
-    private Image imgBackground, imgObject;
-    private MyGroup scaleableGroup;
+    private Image imgBackground;
 
 
-    private Group scaleGroup;
-    private ShapeRenderer shapes;
+
+
+
 
     private final int[] zommLevel = {10,16,25,33,50,66,100,150,200,300,400,600,800,1000};
     private int zoom = 6;
@@ -40,7 +25,7 @@ public class Editor extends Group{
     private ScaleGroup group;
 
     public Editor() {
-        shapes = App.inst().getShapeRenderer();
+
 
         addListener(new InputListener() {
             float oldX, oldY;
@@ -55,7 +40,7 @@ public class Editor extends Group{
                 if (button == Input.Buttons.MIDDLE) {
                     oldX = x;
                     oldY = y;
-                    Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Crosshair);
+                    App.inst().setCursor(App.CursorStyle.Crosshair);
                     return true;
                 } else return false;
 
@@ -97,6 +82,7 @@ public class Editor extends Group{
         addActor(group);
         group.addRectangle(200, 200, 50, 100);
         group.addRectangle(100, 100, 50, 50);
+        group.addCircle(200, 50, 40);
     }
 
 

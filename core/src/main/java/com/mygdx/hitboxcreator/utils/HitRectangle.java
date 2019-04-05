@@ -2,181 +2,162 @@ package com.mygdx.hitboxcreator.utils;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.math.WindowedMean;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.mygdx.hitboxcreator.App;
 
-public class HitRectangle extends Rectangle{
+public class HitRectangle extends HitShape {
+    private Color cLeft, cRight, cBottom, cTop;
 
-    private float lineWidth = 2;
-    private float scale = 1;
-    private Color cLeft, cRight, cTop, cBottom, cMain;
-    private Color cNormal, cSelected;
-    private boolean drawBorder = true;
-    private boolean isSelected = true;
-    private final float grabArea = 10;
-    private float oldX, oldY, oldWidth, oldHeight;
-    private int selection = 0;
-    private ShapeRenderer shapes;
+    public HitRectangle(float x, float y, float width, float height) {
+        setBounds(x, y, width, height);
+
+        initShapeRenderer();
+
+        highlightBorder();
+        drawBorder = true;
+        grabArea = 6;
+
+        //region --- inputListener ---
+        addListener(new HitShapeInputListener() {
 
 
-    public InputListener inputListener = new InputListener() {
-        float oldX, oldY;
+            @Override
+            public boolean mouseMoved(InputEvent event, float x, float y) {
+                selection = 0;
 
-        @Override
-        public boolean mouseMoved(InputEvent event, float x, float y) {
-            selection = 0;
-            if (isSelected) {
-                if (x < getX()-grabArea || x > getX()+getWidth()+grabArea || y < getY()-grabArea || y > getY()+getHeight()+grabArea) {
+                if (x > grabArea && x < getWidth()-grabArea && y > grabArea && y < getHeight()-grabArea) {
+                    selection = Selection.move;
                     highlightBorder();
-                    return false;
+                    return true;
                 }
-                if (getX()-grabArea < x && x < getX()+grabArea) selection = Select.left;
-                else if (getX()+getWidth()-grabArea < x && x < getX()+getWidth()+grabArea) selection = Select.right;
-                if (getY()-grabArea < y && y < getY()+grabArea) selection = selection | Select.bottom;
-                else if (getY()+getHeight()-grabArea < y && y < getY()+getHeight()+grabArea) selection = selection | Select.top;
+                if (-grabArea < x && x < grabArea) selection = Selection.left;
+                else if (getWidth()-grabArea < x && x < getWidth()+grabArea) selection = Selection.right;
+                if (-grabArea < y && y < grabArea) selection = selection | Selection.bottom;
+                else if (getHeight()-grabArea < y && y < getHeight()+grabArea) selection = selection | Selection.top;
                 highlightBorder();
                 return true;
             }
-            return false;
 
-        }
 
-        @Override
-        public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-            oldX = x;
-            oldY = y;
-            return  (button == Input.Buttons.LEFT && selection != 0);
 
-        }
+            @Override
+            public void touchDragged(InputEvent event, float x, float y, int pointer) {
+                float dx = x - oldX;
+                float dy = y - oldY;
+                // when the object moves we have to take this into account for next dx/dy
+                float mx = 0, my = 0;
 
-        @Override
-        public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-
-        }
-
-        @Override
-        public void touchDragged(InputEvent event, float x, float y, int pointer) {
-            float dx = x - oldX;
-            float dy = y - oldY;
-
-            switch (selection) {
-                case Select.left:
-                    setX(getX() + dx);
+                if ((selection & Selection.move) != 0) {
+                    moveBy(dx, dy);
+                    mx = dx;
+                    my = dy;
+                }
+                if ((selection & Selection.left) != 0 && getWidth() - dx >= 2) {
+                    moveBy(dx, 0);
                     setWidth(getWidth() - dx);
-                    break;
+                    mx = dx;
+                }
+                if ((selection & Selection.right) != 0 && getWidth() + dx >= 2) {
+                    setWidth(getWidth() + dx);
+                }
+                if ((selection & Selection.top) != 0 && getHeight() + dy >= 2) {
+                    setHeight(getHeight() + dy);
+                }
+                if ((selection & Selection.bottom) != 0 && getHeight() - dy >= 2) {
+                    moveBy(0, dy);
+                    setHeight(getHeight() - dy);
+                    my = dy;
+                }
+
+
+                oldX = x-mx;
+                oldY = y-my;
             }
+        });
+        //endregion
+    }
 
-            oldX = x;
-            oldY = y;
-        }
-    };
 
-    private void highlightBorder() {
-        cLeft = ((selection & Select.left) != 0) ? cSelected : cNormal;
-        cRight = ((selection & Select.right) != 0) ? cSelected : cNormal;
-        cBottom = ((selection & Select.bottom) != 0) ? cSelected : cNormal;
-        cTop = ((selection & Select.top) != 0) ? cSelected : cNormal;
 
-        if ((selection & Select.top) != 0) Gdx.graphics.setSystemCursor(Cursor.SystemCursor.VerticalResize);
+
+    @Override
+    boolean contains(float x, float y) {
+        return x >= -grabArea && x < getWidth()+grabArea && y >= -grabArea && y < getHeight()+grabArea;
+    }
+
+    @Override
+    void highlightBorder() {
+        cLeft = ((selection & Selection.left) != 0) ? cBorderSelected : cBorderNormal;
+        cRight = ((selection & Selection.right) != 0) ? cBorderSelected : cBorderNormal;
+        cBottom = ((selection & Selection.bottom) != 0) ? cBorderSelected : cBorderNormal;
+        cTop = ((selection & Selection.top) != 0) ? cBorderSelected : cBorderNormal;
+
+        cBody = selection != 0 ? cBodySelected : cBodyNormal;
 
         switch (selection) {
-            case Select.left:
-            case Select.right:
-                Gdx.graphics.setSystemCursor(Cursor.SystemCursor.HorizontalResize);
+            case Selection.move:
+                App.inst().setCursor(App.CursorStyle.Move);
                 break;
-            case Select.bottom:
-            case Select.top:
-                Gdx.graphics.setSystemCursor(Cursor.SystemCursor.VerticalResize);
+            case Selection.left:
+            case Selection.right:
+                App.inst().setCursor(App.CursorStyle.HorizontalResize);
+                break;
+            case Selection.bottom:
+            case Selection.top:
+                App.inst().setCursor(App.CursorStyle.VerticalResize);
+                break;
+            case Selection.topRight:
+            case Selection.bottomLeft:
+                App.inst().setCursor(App.CursorStyle.Diagonal_neResize);
+                break;
+            case Selection.topLeft:
+            case Selection.bottomRight:
+                App.inst().setCursor(App.CursorStyle.Diagonal_nwResize);
                 break;
             default:
-                Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
+                App.inst().setCursor(App.CursorStyle.Arrow);
         }
     }
 
 
-    public HitRectangle() {
-        //addListener(Listener)
-    }
 
-    public HitRectangle(float x, float y, float width, float height) {
-        super(x, y, width, height);
+    @Override
+    public void draw(Batch batch, float parentAlpha) {
+        //shapes.set(ShapeRenderer.ShapeType.Filled);
+        shapes.setColor(cBody);
+        shapes.rect(getX(), getY(), getOriginX(), getOriginY(), getWidth(), getHeight(), getScaleX(), getScaleY(), getRotation());
 
-        cMain = new Color(255, 0, 0, 0.5F);
-
-
-        cNormal = new Color(0,255,255,0.5F);
-        cSelected = new Color(0,0,255,0.5F);
-
-        cLeft = cBottom = cRight = cTop = cNormal;
-
-        shapes = App.inst().getShapeRenderer();
-    }
-
-
-
-    public void draw() {
-        scaleIn();
-
-        shapes.setColor(cMain);
-        shapes.rect(x, y, width, height);
         if (drawBorder) {
             shapes.setColor(cTop);
-            shapes.rectLine(x, y+height, x+width, y+height, lineWidth);
+            shapes.rectLine(getX(), getTop(), getRight(), getTop(), borderWidth);
             shapes.setColor(cRight);
-            shapes.rectLine(x+width, y+height, x+width, y, lineWidth);
+            shapes.rectLine(getRight(), getTop(), getRight(), getY(), borderWidth);
             shapes.setColor(cBottom);
-            shapes.rectLine(x+width, y, x, y, lineWidth);
+            shapes.rectLine(getRight(), getY(), getX(), getY(), borderWidth);
             shapes.setColor(cLeft);
-            shapes.rectLine(x, y, x, y+height, lineWidth);
+            shapes.rectLine(getX(), getY(), getX(), getTop(), borderWidth);
         }
-        scaleOut();
-    }
-
-    public void setScale(float scale) {
-        this.scale = scale;
-    }
-
-    private void scaleIn() {
-        oldX = x;
-        oldY = y;
-        oldWidth = width;
-        oldHeight = height;
-        x *= scale;
-        y *= scale;
-        width *= scale;
-        height *= scale;
-    }
-
-    private void scaleOut() {
-        x = oldX;
-        y = oldY;
-        width = oldWidth;
-        height = oldHeight;
     }
 
 
-    private class Select {
-        static public final int move = 1 << 0;
-        static public final int top = 1 << 1;
-        static public final int right = 1 << 2;
-        static public final int bottom = 1 << 3;
-        static public final int left = 1 << 4;
 
-        static public final int topLeft = top | left;
-        static public final int topRight = top | right;
-        static public final int bottomLeft = bottom | left;
-        static public final int bottomRight = bottom | right;
+    private class Selection {
+        static final int move = 1 << 0;
+        static final int top = 1 << 1;
+        static final int right = 1 << 2;
+        static final int bottom = 1 << 3;
+        static final int left = 1 << 4;
+
+        static final int topRight = top | right;
+        static final int topLeft = top | left;
+        static final int bottomRight = bottom | right;
+        static final int bottomLeft = bottom | left;
     }
-
 }

@@ -11,13 +11,15 @@ import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Disposable;
 import com.mygdx.hitboxcreator.App;
-import com.mygdx.hitboxcreator.utils.HitRectangle2;
+import com.mygdx.hitboxcreator.utils.HitCircle;
+import com.mygdx.hitboxcreator.utils.HitRectangle;
 
-public class ScaleGroup extends Group {
+public class ScaleGroup extends Group implements Disposable {
     private Image imgObject;
+    private Texture tObject;
     private ShapeRenderer shapes;
 
     public ScaleGroup() {
@@ -37,20 +39,35 @@ public class ScaleGroup extends Group {
         });
     }
 
+    /** Add a rectangular Hitbox */
     public void addRectangle(float x, float y, float width, float height) {
-        addActor(new HitRectangle2(x, y, width, height));
-
-
+        addActor(new HitRectangle(x, y, width, height));
     }
 
+    /** Add a round Hitbox */
+    public void addCircle(float x, float y, float radius) {
+        addActor(new HitCircle(x, y, radius));
+    }
 
+    /**
+     * Loads the Image of the Object you want to create a hitbox for
+     * @param texture
+     */
     public void setImage(Texture texture) {
-        imgObject.setDrawable(new TextureRegionDrawable(new TextureRegion(texture)));
+        if (tObject != null) tObject.dispose();
+        tObject = texture;
+        imgObject.setDrawable(new TextureRegionDrawable(new TextureRegion(tObject)));
         imgObject.setSize(texture.getWidth(), texture.getHeight());
         setSize(texture.getWidth(), texture.getHeight());
     }
 
-
+    /**
+     *  Draws the object, HitShapes and a border around the object for positioning reference.
+     *  Although it calls drawChildren(batch, alpha) the HitShapes and border are actually drawn
+     *  by a ShapeRenderer that belongs to App. This group and all HitShapes are referencing it.
+     *  ShapeRenderer has to be set up (ProjectionMatrix and groupTransform) and started.
+     *
+     */
     @Override
     public void draw(Batch batch, float parentAlpha) {
         Gdx.gl.glEnable(GL20.GL_BLEND);
@@ -73,5 +90,10 @@ public class ScaleGroup extends Group {
 
         shapes.end();
         Gdx.gl.glDisable(GL20.GL_BLEND);
+    }
+
+    @Override
+    public void dispose() {
+        if (tObject != null) tObject.dispose();
     }
 }

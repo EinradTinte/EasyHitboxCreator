@@ -8,6 +8,7 @@ import com.mygdx.hitboxcreator.App;
 
 /** Launches the desktop (LWJGL) application. */
 public class DesktopLauncher {
+
     public static void main(String[] args) {
         createApplication();
     }
@@ -19,7 +20,7 @@ public class DesktopLauncher {
     private static Lwjgl3ApplicationConfiguration getDefaultConfiguration() {
         Lwjgl3ApplicationConfiguration configuration = new Lwjgl3ApplicationConfiguration();
         configuration.setTitle("Easy Hitbox Creator");
-        configuration.setWindowedMode(640, 480);
+        configuration.setWindowedMode(App.WIDTH, App.HEIGHT);
         //configuration.width = 640;
         //configuration.height = 480;
 

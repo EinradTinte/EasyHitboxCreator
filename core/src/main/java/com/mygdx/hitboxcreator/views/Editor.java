@@ -19,8 +19,10 @@ public class Editor extends Group{
 
 
 
-    private final int[] zommLevel = {10,16,25,33,50,66,100,150,200,300,400,600,800,1000};
-    private int zoom = 6;
+    private static final int[] ZOOM_LEVELS = {10, 16, 25, 33, 50, 66, 100, 150, 200, 300, 400, 600, 800, 1000};
+    private static final int DEFAULT_ZOOM_INDEX = 6;
+
+    private int zoomIndex = DEFAULT_ZOOM_INDEX;
 
     private ScaleGroup group;
 
@@ -62,13 +64,13 @@ public class Editor extends Group{
             @Override
             public boolean scrolled(InputEvent event, float x, float y, int amount) {
 
-                if (zoom-amount >= 0 && zoom-amount < zommLevel.length) {
-                    zoom -= amount;
-                    float dx = x-group.getX(), dy= y-group.getY();
-                    float newScale = zommLevel[zoom] / 100F;
-                    group.moveBy(dx*(1-newScale/group.getScaleX()), dy*(1-newScale/group.getScaleX()));
-                    group.setScale(newScale);
-                }
+                zoomIndex = Math.max(0, Math.min(ZOOM_LEVELS.length-1, zoomIndex - amount));
+
+                float dx = x-group.getX(), dy= y-group.getY();
+                float newScale = ZOOM_LEVELS[zoomIndex] / 100F;
+                group.moveBy(dx*(1-newScale/group.getScaleX()), dy*(1-newScale/group.getScaleX()));
+                group.setScale(newScale);
+
                 return true;
             }
         });

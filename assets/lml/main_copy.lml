@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE stack SYSTEM "/lml.dtd">
+
+<stack fillparent="true" touchable="enabled" click="resetViewFocus" onEscape="resetViewFocus">
+	<vistable id="root" bgtiled="custom/background-fill">
+		
+		...
+		
+		<vistable grow="true">
+
+		    <container ...>
+		    </container>
+
+		    <separator growy="true"/>
+
+		    <container grow="true" fill="true">
+		        <:titledpane id="titledPaneAtlasPreview" title="@panelTitleAtlasPreview" icon="custom/ic-title-atlas">
+		            <:import path="lml/panePreviewCanvas.lml"/>
+		        </:titledpane>
+		    </container>
+
+		</vistable>
+	</vistable>
+</stack>

@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!DOCTYPE stack SYSTEM "/lml.dtd">
+
+<stack grow="true">
+
+    <vistable tablealign="topleft" onecolumn="true" tablepad="0">
+
+        <vistable growx="true" tablealign="left" background="button">
+
+
+            <:sidebutton id="btnOutputSelectAll" icon="custom/ic-input-file-properties" onchange="outputSelectAll" tooltip="outputSelectAll"/>
+            <:sidebutton id="btnOutputSettings" icon="custom/ic-process" onchange="outputSettings" tooltip="settingsOutput"/>
+        </vistable>
+
+        <vistable grow="true" pad="4">
+            <scrollpane overscroll="false" flick="false" barsontop="true" fadebars="false" disabledx="true" grow="true">
+                <scrollabletextarea id="outputTextArea" readonly="true">
+                    Das
+                    hier
+                    ist
+                    ein
+                    Beispiel
+                    Text.
+                    Muuuh!
+                </scrollabletextarea>
+            </scrollpane>
+        </vistable>
+
+    </vistable>
+
+</stack>

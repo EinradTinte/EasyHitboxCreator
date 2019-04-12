@@ -8,53 +8,59 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Group;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.badlogic.gdx.utils.Disposable;
 import com.mygdx.hitboxcreator.App;
-import com.mygdx.hitboxcreator.utils.HitCircle;
-import com.mygdx.hitboxcreator.utils.HitRectangle;
+import com.mygdx.hitboxcreator.utils.HitShape;
 import com.mygdx.hitboxcreator.utils.ProjectModel;
 
-public class ScaleGroup extends Group implements Disposable {
-    private Image imgObject;
+
+
+
+public class ScaleGroup2 extends Group {
+    private final ShapeRenderer shapes = App.inst().getShapeRenderer();
+    private ProjectModel project;
     private Texture tObject;
-    private ShapeRenderer shapes;
+    private Image imgObject = new Image();
 
-
-    public ScaleGroup() {
-
-        imgObject = new Image();
+    public ScaleGroup2() {
         addActor(imgObject);
-        shapes = App.inst().getShapeRenderer();
 
-        setSize(600,400);
-        setImage(new Texture("obstacle3_intact.png"));
+
+        project = new ProjectModel();
+        setImage(Gdx.files.internal("obstacle3_intact.png").path());
     }
 
-    /** Add a rectangular Hitbox */
-    public void addRectangle(float x, float y, float width, float height) {
-        addActor(new HitRectangle(x, y, width, height));
+
+    public void addHitShape(HitShape hitShape) {
+        project.addHitShape(hitShape);
+        addActor(hitShape);
     }
 
-    /** Add a round Hitbox */
-    public void addCircle(float x, float y, float radius) {
-        addActor(new HitCircle(x, y, radius));
+    public void removeHitShape(HitShape hitShape) {
+        removeActor(hitShape);
+        project.removeHitShape(hitShape);
     }
 
-    /**
-     * Loads the Image of the Object you want to create a hitbox for
-     * @param texture
-     */
-    public void setImage(Texture texture) {
+
+    public void reloadProject(ProjectModel project) {
+        clear();
+        for (HitShape hitShape : project.getHitShapes()) {
+            addActor(hitShape);
+        }
+        setImage(project.getImage());
+    }
+
+    public void setImage(String imgPath) {
         if (tObject != null) tObject.dispose();
-        tObject = texture;
+        tObject = new Texture(imgPath);
         imgObject.setDrawable(new TextureRegionDrawable(new TextureRegion(tObject)));
-        imgObject.setSize(texture.getWidth(), texture.getHeight());
-        setSize(texture.getWidth(), texture.getHeight());
+        imgObject.setSize(tObject.getWidth(), tObject.getHeight());
+        setSize(tObject.getWidth(), tObject.getHeight());
+
+        project.setImage(imgPath);
     }
+
 
     /**
      *  Draws the object, HitShapes and a border around the object for positioning reference.
@@ -87,8 +93,5 @@ public class ScaleGroup extends Group implements Disposable {
         Gdx.gl.glDisable(GL20.GL_BLEND);
     }
 
-    @Override
-    public void dispose() {
-        if (tObject != null) tObject.dispose();
-    }
+
 }

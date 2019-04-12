@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<!DOCTYPE stack SYSTEM "/lml.dtd">
+
+<stack fillparent="true"  touchable="enabled" >
+	<vistable id="root" bgtiled="custom/background-fill">
+		
+		<container height="20" fillx="true"/>
+
+		<:row/>
+		
+		<vistable grow="true">
+			<!-- importing macros -->
+			<:import path="lml/titledPane.lml"/>
+			<:import path="lml/sidebutton.lml"/>
+
+		    <container growy="true" fill="true" width="320">
+				<vissplitpane id="packListSplitPane" vertical="true" min="0.2" max="0.7" value="0.2">
+
+					<container fill="true">
+						<:titledpane id="titledPaneProject" title="@panelTitleProject" icon="custom/ic-title-packs">
+							<:import path="lml/paneProject.lml"/>
+						</:titledpane>
+					</container>
+
+					<container fill="true">
+						<:titledpane id="titledPaneOutput" title="@panelTitleOutput" icon="custom/ic-title-exclamation">
+							<:import path="lml/paneOutput.lml"/>
+						</:titledpane>
+					</container>
+
+				</vissplitpane>
+		    </container>
+
+			<separator growy="true"/>
+
+		    <container grow="true" fill="true">
+		        <:titledpane id="titledPaneAtlasPreview" title="@panelTitleEditor" icon="custom/ic-title-atlas">
+					<stack grow="true">
+						<editor id="editor"/>
+					</stack>
+				</:titledpane>
+		    </container>
+
+		</vistable>
+	</vistable>
+</stack>

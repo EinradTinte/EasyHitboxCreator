@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!DOCTYPE :macro SYSTEM "/lml.dtd">
+
+<:macro alias="sidebutton" replace="" id icon tooltip onchange>
+    <visimagebutton
+        id="{id}"
+        icon="{icon}"
+        onchange="{onchange}"
+        imagescaling="none"
+        generatedisabled="true"
+        focusborder="false"
+        tooltip="{tooltip}"
+        width="25"
+        height="25"
+    />
+</:macro>

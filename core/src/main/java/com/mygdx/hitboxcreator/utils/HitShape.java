@@ -3,6 +3,7 @@ package com.mygdx.hitboxcreator.utils;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -63,7 +64,7 @@ public abstract class HitShape extends Actor {
      * Edit mouseMoved() and touchDragged()
      */
     class HitShapeInputListener extends InputListener {
-        float oldX, oldY;
+        final Vector2 lastPos = new Vector2();
 
         @Override
         public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
@@ -80,13 +81,11 @@ public abstract class HitShape extends Actor {
 
         @Override
         public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-            oldX = x;
-            oldY = y;
-            if (button == Input.Buttons.LEFT) {
-                toFront();
-                return true;
-            }
-            else return false;
+            if (button != Input.Buttons.LEFT) return false;
+
+            toFront();
+            lastPos.set(x, y);
+            return true;
         }
     }
 }

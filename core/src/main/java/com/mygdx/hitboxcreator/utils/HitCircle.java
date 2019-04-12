@@ -72,8 +72,8 @@ public class HitCircle extends HitShape {
             @Override
             public void touchDragged(InputEvent event, float x, float y, int pointer) {
 
-                float dx = x - oldX;
-                float dy = y - oldY;
+                float dx = x - lastPos.x;
+                float dy = y - lastPos.y;
                 // when the object moves we have to take this into account for next dx/dy
                 float mx = 0, my = 0;
 
@@ -136,9 +136,7 @@ public class HitCircle extends HitShape {
                 }
 
 
-                oldX = x-mx;
-                oldY = y-my;
-
+                lastPos.set(x-mx, y-my);
             }
         });
         //endregion

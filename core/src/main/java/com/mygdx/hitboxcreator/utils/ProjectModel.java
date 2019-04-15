@@ -1,6 +1,7 @@
 package com.mygdx.hitboxcreator.utils;
 
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
@@ -11,6 +12,11 @@ public class ProjectModel{
     private final Array<HitCircle> circles = new Array<HitCircle>();
     private FileHandle projectFile;
     private String imgPath;
+
+    private Color cBodyNormal;
+    static Color cBodySelected;
+    static Color cBorderNormal;
+    static Color cBorderSelected;
 
 
     public ProjectModel() {
@@ -31,6 +37,8 @@ public class ProjectModel{
             circles.add((HitCircle) hitShape);
         }
     }
+
+
 
     public void removeHitShape(HitShape hitShape) {
         if (hitShape.getClass() == HitRectangle.class) {

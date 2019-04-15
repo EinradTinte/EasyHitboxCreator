@@ -18,7 +18,7 @@ import com.mygdx.hitboxcreator.utils.ProjectModel;
 
 
 public class ScaleGroup2 extends Group {
-    private final ShapeRenderer shapes = App.inst().getShapeRenderer();
+
     private ProjectModel project;
     private Texture tObject;
     private Image imgObject = new Image();
@@ -76,28 +76,8 @@ public class ScaleGroup2 extends Group {
      */
     @Override
     public void draw(Batch batch, float parentAlpha) {
-
-        //Gdx.gl.glEnable(GL20.GL_BLEND);
-        //shapes.setProjectionMatrix(getStage().getViewport().getCamera().combined);
-        //shapes.begin();
-
-
-        //applyTransform(shapes, computeTransform());
-
-        //shapes.set(ShapeRenderer.ShapeType.Filled);
         super.draw(batch, parentAlpha);
-
         App.inst().getShader().setTransformMatrix(computeTransform());
-
-        //resetTransform(shapes);
-
-        //shapes.set(ShapeRenderer.ShapeType.Line);
-        //shapes.setColor(Color.RED);
-        //shapes.rect(getX(), getY(), getOriginX(), getOriginY(), getWidth(), getHeight(), getScaleX(), getScaleY(), getRotation());
-
-        //shapes.end();
-        //Gdx.gl.glDisable(GL20.GL_BLEND);
-
     }
 
 

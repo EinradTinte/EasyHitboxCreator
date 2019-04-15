@@ -39,8 +39,8 @@ public class App extends LmlApplicationListener {
     private static App instance;
     public static final int WIDTH = 900, HEIGHT = 400;
 
-    private ShapeRenderer shapeRenderer;
-    private PolygonSpriteBatch batch;
+
+    private SpriteBatch batch;
     private Viewport viewport;
 
 
@@ -49,7 +49,7 @@ public class App extends LmlApplicationListener {
 
     private  Skin skin;
 
-    private Table table;
+
 
     private BitmapFont font;
     private Cursor cMove, cResize_ne, cResize_nw;
@@ -78,9 +78,8 @@ public class App extends LmlApplicationListener {
 
         shader = new Shader();
 
-        shapeRenderer = new ShapeRenderer();
-        shapeRenderer.setAutoShapeType(true);
-        batch = new PolygonSpriteBatch();
+
+        batch = new SpriteBatch();
         viewport = new ScreenViewport();
         stage = new Stage(viewport, batch) {
             @Override
@@ -104,9 +103,7 @@ public class App extends LmlApplicationListener {
 
 
 
-        //table.add(editor).align(Align.topRight).fillX();
-        //stage.addActor(table);
-        //stage.addActor(editor);
+
         //stage.setDebugAll(true);
 
 
@@ -179,7 +176,6 @@ public class App extends LmlApplicationListener {
 
     public Viewport getViewport() { return viewport;}
 
-    public ShapeRenderer getShapeRenderer() {return shapeRenderer;}
 
     public void setCursor(int cursor) {
         switch (cursor) {
@@ -210,21 +206,7 @@ public class App extends LmlApplicationListener {
         }
     }
 
- /*   @Override
-    public void render() {
 
-        Gdx.gl.glClearColor(1, 1, 1, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        stage.act();
-        stage.draw();
-
-        batch.begin();
-            font.draw(batch, Gdx.graphics.getFramesPerSecond()+" FPS", 10, 20);
-        batch.end();
-
-
-    } */
 
     public Shader getShader() {
         return shader;

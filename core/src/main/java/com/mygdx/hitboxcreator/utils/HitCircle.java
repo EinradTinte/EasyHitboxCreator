@@ -189,8 +189,7 @@ public class HitCircle extends HitShape {
 
     /** Draws a ring with its width centered at radius */
     void drawRing(float x, float y, float radius, float width, Color color) {
-        // Estimating the number of segments needed for a smooth circle
-        int segmentCount = (int)(6 * (float)Math.cbrt(radius * getParent().getScaleX()));
+        int segmentCount = calculateSegmentCount(radius);
         float segmentWidth = MathUtils.PI2 / segmentCount;
         float angle = 0;
         float radiusInner = radius - width/2;
@@ -216,8 +215,7 @@ public class HitCircle extends HitShape {
     }
 
     void drawCircle(float x, float y, float radius, Color color) {
-        // Estimating the number of segments needed for a smooth circle
-        int segmentCount = (int)(6 * (float)Math.cbrt(radius * getParent().getScaleX()));
+        int segmentCount = calculateSegmentCount(radius);
         float segmentWidth = MathUtils.PI2 / segmentCount;
         float angle = 0;
         Vector2 centerV = obtainV2().set(x, y);
@@ -231,6 +229,11 @@ public class HitCircle extends HitShape {
             oldV.set(newV);
         }
         freeAll();
+    }
+
+    /** Estimating the number of segments needed for a smooth circle */
+    int calculateSegmentCount(float radius) {
+        return (int)(7 * (float)Math.cbrt(radius * getParent().getScaleX()));
     }
 
     private class Selection {

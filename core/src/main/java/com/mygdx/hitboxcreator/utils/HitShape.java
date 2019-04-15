@@ -15,7 +15,7 @@ import com.mygdx.hitboxcreator.App;
 import com.mygdx.hitboxcreator.views.Shader;
 
 public abstract class HitShape extends Actor {
-    InputListener inputListener;
+
     Shader shader = App.inst().getShader();
     Color cBody;
     static Color cBodyNormal = new Color(1,0,0,0.5F);

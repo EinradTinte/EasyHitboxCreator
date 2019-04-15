@@ -81,6 +81,7 @@ public class Editor extends Stack {
     @Override
     public void draw(Batch batch, float parentAlpha) {
         batch.flush();
+        // calculating scisscors because we only want to draw in the editor window
         getStage().calculateScissors(widgetAreaBounds.set(getX(), getY(), getWidth(), getHeight()), scissorBounds);
         App.inst().getShader().setScissorBounds(scissorBounds);
         if (ScissorStack.pushScissors(scissorBounds)) {

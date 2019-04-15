@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.github.czyzby.lml.annotation.LmlAction;
 import com.github.czyzby.lml.annotation.LmlActor;
 import com.github.czyzby.lml.parser.impl.AbstractLmlView;
@@ -15,6 +16,7 @@ import com.kotcrab.vis.ui.contrib.widget.file.ImgScalrFileChooserIconProvider;
 import com.kotcrab.vis.ui.contrib.widget.file.WindowsFileChooserIconProvider;
 import com.kotcrab.vis.ui.widget.VisImageButton;
 import com.kotcrab.vis.ui.widget.VisTable;
+import com.kotcrab.vis.ui.widget.VisTextField;
 import com.kotcrab.vis.ui.widget.file.FileChooser;
 import com.kotcrab.vis.ui.widget.file.FileTypeFilter;
 import com.kotcrab.vis.ui.widget.file.SingleFileChooserListener;
@@ -24,7 +26,8 @@ import com.mygdx.hitboxcreator.App;
 public class MainView extends AbstractLmlView {
 
     @LmlActor("btnOutputSettings") VisImageButton btnOutputSettings;
-    @LmlAction("btnOutputSelectAll") VisImageButton btnOutputSelectAll;
+    @LmlActor("btnOutputSelectAll") VisImageButton btnOutputSelectAll;
+    @LmlActor("edtImgPath") VisTextField edtImgPath;
 
     FileChooser fileChooser;
     FileTypeFilter typeFilterImg;
@@ -83,7 +86,7 @@ public class MainView extends AbstractLmlView {
         fileChooser.setListener(new SingleFileChooserListener() {
             @Override
             protected void selected(FileHandle fileHandle) {
-
+                edtImgPath.setText(fileHandle.file().getAbsolutePath());
             }
         });
 

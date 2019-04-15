@@ -1,37 +1,37 @@
 package com.mygdx.hitboxcreator;
 
-import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.VertexAttribute;
+import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.I18NBundle;
-import com.badlogic.gdx.utils.Scaling;
-import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.ScalingViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.github.czyzby.lml.parser.LmlData;
 import com.github.czyzby.lml.parser.LmlParser;
-import com.github.czyzby.lml.util.Lml;
 import com.github.czyzby.lml.util.LmlApplicationListener;
 import com.github.czyzby.lml.vis.util.VisLml;
 import com.kotcrab.vis.ui.VisUI;
 import com.mygdx.hitboxcreator.lml.AppLmlSyntax;
-import com.mygdx.hitboxcreator.views.Editor;
 import com.mygdx.hitboxcreator.views.MainView;
+import com.mygdx.hitboxcreator.views.Shader;
 
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
@@ -40,9 +40,11 @@ public class App extends LmlApplicationListener {
     public static final int WIDTH = 900, HEIGHT = 400;
 
     private ShapeRenderer shapeRenderer;
-    private SpriteBatch batch;
+    private PolygonSpriteBatch batch;
     private Viewport viewport;
-    private Editor editor;
+
+
+
     private Stage stage;
 
     private  Skin skin;
@@ -51,6 +53,13 @@ public class App extends LmlApplicationListener {
 
     private BitmapFont font;
     private Cursor cMove, cResize_ne, cResize_nw;
+
+    private Shader shader;
+
+
+
+
+
 
     /** Singleton accessor */
     public static App inst() {
@@ -66,11 +75,22 @@ public class App extends LmlApplicationListener {
 
     @Override
     public void create() {
+
+        shader = new Shader();
+
         shapeRenderer = new ShapeRenderer();
         shapeRenderer.setAutoShapeType(true);
-        batch = new SpriteBatch();
+        batch = new PolygonSpriteBatch();
         viewport = new ScreenViewport();
-        stage = new Stage(viewport, batch);
+        stage = new Stage(viewport, batch) {
+            @Override
+            public void draw() {
+                super.draw();
+
+                shader.setProjectionMatrix(getCamera().combined);
+                shader.flush();
+            }
+        };
 
 
 
@@ -206,12 +226,20 @@ public class App extends LmlApplicationListener {
 
     } */
 
+    public Shader getShader() {
+        return shader;
+    }
+
+
+
     @Override
     public void dispose() {
         batch.dispose();
         cMove.dispose();
         cResize_ne.dispose();
         cResize_nw.dispose();
+
+
 
         VisUI.dispose();
     }

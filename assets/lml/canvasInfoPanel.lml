@@ -6,7 +6,7 @@
 	<vistable tooltip="canvasInfoTtPageDimen">
 		<visimage style="custom/ic-small-dimens" color="light-grey"/>
 		<actor width="4"/>
-		<vislabel id="lblPageDimens" style="small" text="1024x256"/>
+		<vislabel id="lblImgDimens" style="small" text="1024x256"/>
 	</vistable>
 
 	<actor width="12"/>

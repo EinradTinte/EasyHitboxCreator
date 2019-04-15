@@ -8,15 +8,12 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Group;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Disposable;
 import com.mygdx.hitboxcreator.App;
 import com.mygdx.hitboxcreator.utils.HitCircle;
 import com.mygdx.hitboxcreator.utils.HitRectangle;
-import com.mygdx.hitboxcreator.utils.ProjectModel;
 
 public class ScaleGroup extends Group implements Disposable {
     private Image imgObject;

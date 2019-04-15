@@ -1,8 +1,6 @@
 package com.mygdx.hitboxcreator.views;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -11,6 +9,8 @@ import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.mygdx.hitboxcreator.App;
+import com.mygdx.hitboxcreator.utils.HitCircle;
+import com.mygdx.hitboxcreator.utils.HitRectangle;
 import com.mygdx.hitboxcreator.utils.HitShape;
 import com.mygdx.hitboxcreator.utils.ProjectModel;
 
@@ -29,6 +29,11 @@ public class ScaleGroup2 extends Group {
 
         project = new ProjectModel();
         setImage(Gdx.files.internal("obstacle3_intact.png").path());
+
+        //addHitShape(new HitRectangle(50, 50, 200, 100));
+        addHitShape(new HitRectangle(100, 100, 100, 200));
+
+        addHitShape(new HitCircle(400,100,50));
     }
 
 
@@ -71,26 +76,28 @@ public class ScaleGroup2 extends Group {
      */
     @Override
     public void draw(Batch batch, float parentAlpha) {
-        Gdx.gl.glEnable(GL20.GL_BLEND);
-        shapes.setProjectionMatrix(getStage().getViewport().getCamera().combined);
-        shapes.begin();
+
+        //Gdx.gl.glEnable(GL20.GL_BLEND);
+        //shapes.setProjectionMatrix(getStage().getViewport().getCamera().combined);
+        //shapes.begin();
 
 
-        applyTransform(shapes, computeTransform());
+        //applyTransform(shapes, computeTransform());
 
-        shapes.set(ShapeRenderer.ShapeType.Filled);
+        //shapes.set(ShapeRenderer.ShapeType.Filled);
         super.draw(batch, parentAlpha);
 
+        App.inst().getShader().setTransformMatrix(computeTransform());
 
+        //resetTransform(shapes);
 
-        resetTransform(shapes);
+        //shapes.set(ShapeRenderer.ShapeType.Line);
+        //shapes.setColor(Color.RED);
+        //shapes.rect(getX(), getY(), getOriginX(), getOriginY(), getWidth(), getHeight(), getScaleX(), getScaleY(), getRotation());
 
-        shapes.set(ShapeRenderer.ShapeType.Line);
-        shapes.setColor(Color.RED);
-        shapes.rect(getX(), getY(), getOriginX(), getOriginY(), getWidth(), getHeight(), getScaleX(), getScaleY(), getRotation());
+        //shapes.end();
+        //Gdx.gl.glDisable(GL20.GL_BLEND);
 
-        shapes.end();
-        Gdx.gl.glDisable(GL20.GL_BLEND);
     }
 
 

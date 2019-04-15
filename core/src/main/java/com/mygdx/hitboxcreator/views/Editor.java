@@ -1,95 +1,110 @@
 package com.mygdx.hitboxcreator.views;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.Cursor;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.PolygonRegion;
+import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Group;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Stack;
+import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
+import com.github.czyzby.lml.parser.LmlParser;
+import com.github.czyzby.lml.parser.impl.tag.AbstractNonParentalActorLmlTag;
+import com.github.czyzby.lml.parser.tag.LmlActorBuilder;
+import com.github.czyzby.lml.parser.tag.LmlTag;
+import com.github.czyzby.lml.parser.tag.LmlTagProvider;
 import com.mygdx.hitboxcreator.App;
 
-public class Editor extends Group{
+public class Editor extends Stack {
 
-    private Image imgBackground;
-
-
-
-
+    private  InfoPanel infoPanel;
+    private  CanvasHolder canvasHolder;
+    private  Image imgBackground;
 
 
-    private static final int[] ZOOM_LEVELS = {10, 16, 25, 33, 50, 66, 100, 150, 200, 300, 400, 600, 800, 1000};
-    private static final int DEFAULT_ZOOM_INDEX = 6;
+    private final Rectangle widgetAreaBounds = new Rectangle();
+    private final Rectangle scissorBounds = new Rectangle();
 
-    private int zoomIndex = DEFAULT_ZOOM_INDEX;
-
-    private ScaleGroup group;
-
-    public Editor() {
+    public Editor(Skin skin) {
 
 
-        addListener(new InputListener() {
-            float oldX, oldY;
+        // Layout
+        {
+            // Background
+            {
 
-            @Override
-            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-                getStage().setScrollFocus(Editor.this);
+                imgBackground = new Image(skin.getTiledDrawable("custom/transparent-light"));
+                addActor(imgBackground);
             }
 
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                if (button == Input.Buttons.MIDDLE) {
-                    oldX = x;
-                    oldY = y;
-                    App.inst().setCursor(App.CursorStyle.Crosshair);
-                    return true;
-                } else return false;
+            // HitShapes
+            {
+                canvasHolder = new CanvasHolder(skin);
+                canvasHolder.setListener(new CanvasHolder.Listener() {
+                    @Override
+                    public void onZoomChanged(int percentage) {
+                        infoPanel.setZoomLevel(percentage);
+                    }
+                });
+
+                addActor(canvasHolder);
+            }
+
+            // Buttons
+            {
 
             }
 
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
+            // Info pane
+            {
+                infoPanel = new InfoPanel(App.inst().getParser());
+                addActor(infoPanel);
             }
+        }
+    }
 
-            @Override
-            public void touchDragged(InputEvent event, float x, float y, int pointer) {
-                group.moveBy(x - oldX, y - oldY);
-                oldX = x;
-                oldY = y;
-            }
+    public void reloadProject() {
 
-            /** Zoom. Changes scaling and moves group so it zooms on cursor position. */
-            @Override
-            public boolean scrolled(InputEvent event, float x, float y, int amount) {
+    }
 
-                zoomIndex = Math.max(0, Math.min(ZOOM_LEVELS.length-1, zoomIndex - amount));
+    private void addHitRectangle() {
 
-                float dx = x-group.getX(), dy= y-group.getY();
-                float newScale = ZOOM_LEVELS[zoomIndex] / 100F;
-                group.moveBy(dx*(1-newScale/group.getScaleX()), dy*(1-newScale/group.getScaleX()));
-                group.setScale(newScale);
+    }
 
-                return true;
-            }
-        });
+    private void addHitCircle() {
 
-
-
-
-        setBounds(0,0,600,400);
-
-        group = new ScaleGroup();
-        addActor(group);
-        group.addRectangle(200, 200, 50, 100);
-        group.addRectangle(100, 100, 50, 50);
-        group.addCircle(200, 50, 40);
     }
 
 
+    // Apply scissors
+    @Override
+    public void draw(Batch batch, float parentAlpha) {
+        batch.flush();
+        getStage().calculateScissors(widgetAreaBounds.set(getX(), getY(), getWidth(), getHeight()), scissorBounds);
+        App.inst().getShader().setScissorBounds(scissorBounds);
+        if (ScissorStack.pushScissors(scissorBounds)) {
+            super.draw(batch, parentAlpha);
+            batch.flush();
+            ScissorStack.popScissors();
+        }
+    }
 
+    public static class EditorLmlTagProvider implements LmlTagProvider {
+        @Override
+        public LmlTag create(LmlParser lmlParser, LmlTag lmlTag, StringBuilder stringBuilder) {
+            return new EditorLmlTag(lmlParser, lmlTag, stringBuilder);
+        }
+    }
 
+    public static class EditorLmlTag extends AbstractNonParentalActorLmlTag {
+        public EditorLmlTag(LmlParser parser, LmlTag parentTag, StringBuilder rawTagData) {
+            super(parser, parentTag, rawTagData);
+        }
 
-
+        @Override
+        protected Actor getNewInstanceOfActor(LmlActorBuilder lmlActorBuilder) {
+            return new Editor(getSkin(lmlActorBuilder));
+        }
+    }
 }

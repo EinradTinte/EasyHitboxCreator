@@ -114,7 +114,7 @@ public class CanvasHolder extends WidgetGroup {
             float newScale = ZOOM_LEVELS[zoomIndex] / 100F;
             group.moveBy(dx*(1-newScale/group.getScaleX()), dy*(1-newScale/group.getScaleX()));
             group.setScale(newScale);
-
+            setZoomIndex(zoomIndex);
             return true;
         }
     }

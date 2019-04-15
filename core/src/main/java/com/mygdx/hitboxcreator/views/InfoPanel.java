@@ -11,7 +11,7 @@ import com.github.czyzby.lml.parser.impl.DefaultLmlParser;
 public class InfoPanel extends Container {
 
     private final Label lblZoom;
-
+    private final Label lblImgDimens;
 
     public InfoPanel(LmlParser parser) {
         align(Align.top);
@@ -24,6 +24,7 @@ public class InfoPanel extends Container {
         setActor(root);
 
         lblZoom = root.findActor("lblZoom");
+        lblImgDimens = root.findActor("lblImgDimens");
     }
 
 
@@ -31,5 +32,7 @@ public class InfoPanel extends Container {
         lblZoom.setText(String.format("%.0f%%", zoom));
     }
 
-
+    public void setImgDimens(int width, int heigth) {
+        lblImgDimens.setText(width + "x" + heigth);
+    }
 }

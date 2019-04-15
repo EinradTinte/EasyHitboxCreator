@@ -2,7 +2,7 @@ package com.mygdx.hitboxcreator.lml;
 
 import com.github.czyzby.lml.vis.parser.impl.VisLmlSyntax;
 import com.mygdx.hitboxcreator.lml.attributes.TableTiledBackgroundLmlAttribute;
-import com.mygdx.hitboxcreator.views.Editor2;
+import com.mygdx.hitboxcreator.views.Editor;
 
 public class AppLmlSyntax extends VisLmlSyntax {
 
@@ -11,7 +11,7 @@ public class AppLmlSyntax extends VisLmlSyntax {
         super.registerActorTags();
 
         addTagProvider(new GroupLmlTag.TagProvider(), "group");
-        addTagProvider(new Editor2.EditorLmlTagProvider(), "editor");
+        addTagProvider(new Editor.EditorLmlTagProvider(), "editor");
     }
 
     @Override

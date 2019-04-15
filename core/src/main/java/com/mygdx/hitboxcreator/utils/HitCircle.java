@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.utils.Align;
 import com.mygdx.hitboxcreator.App;
@@ -16,6 +17,7 @@ public class HitCircle extends HitShape {
     private double angle;
     private int borderArea;
     private final float minRadius = 5;
+
 
 
     private final int top = 1;
@@ -31,7 +33,7 @@ public class HitCircle extends HitShape {
         this.radius = radus;
         setBounds(x - radius, y - radius, radius * 2, radius * 2);
 
-        initShapeRenderer();
+
 
         highlightBorder();
         drawBorder = true;
@@ -176,18 +178,59 @@ public class HitCircle extends HitShape {
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
-        //shapes.set(ShapeRenderer.ShapeType.Filled);
-        shapes.setColor(cBody);
-        shapes.circle(getX() + radius, getY() + radius, radius);
-        /*
+
+
+        drawCircle(getX() + radius, getY() + radius, radius, cBody);
         if (drawBorder) {
-            shapes.set(ShapeRenderer.ShapeType.Line);
-            shapes.setColor(cBorder);
-            for (int i = MathUtils.round(-borderWidth/2); i < MathUtils.round(borderWidth/2); i++) {
-                shapes.circle(getX() + radius, getY() + radius, radius+i);
-            }
+            drawRing(getX() + radius, getY() + radius, radius, borderWidth, cBorder);
         }
-        */
+    }
+
+
+    /** Draws a ring with its width centered at radius */
+    void drawRing(float x, float y, float radius, float width, Color color) {
+        // Estimating the number of segments needed for a smooth circle
+        int segmentCount = (int)(6 * (float)Math.cbrt(radius * getParent().getScaleX()));
+        float segmentWidth = MathUtils.PI2 / segmentCount;
+        float angle = 0;
+        float radiusInner = radius - width/2;
+        float radiusOuter = radius + width/2;
+        float sin, cos;
+        Vector2 oldInnerV = obtainV2().set(x, y + radiusInner);
+        Vector2 oldOuterV = obtainV2().set(x, y + radiusOuter);
+        Vector2 newInnerV = obtainV2();
+        Vector2 newOuterV = obtainV2();
+
+        for (int i = 0; i < segmentCount; i++) {
+            angle += segmentWidth;
+            sin = (float)Math.sin(angle);
+            cos = (float)Math.cos(angle);
+            newInnerV.set(x + sin * radiusInner, y + cos * radiusInner);
+            newOuterV.set(x + sin * radiusOuter, y + cos * radiusOuter);
+            drawTriangle(oldInnerV, oldOuterV, newOuterV, color);
+            drawTriangle(oldInnerV, newOuterV, newInnerV, color);
+            oldInnerV.set(newInnerV);
+            oldOuterV.set(newOuterV);
+        }
+        freeAll();
+    }
+
+    void drawCircle(float x, float y, float radius, Color color) {
+        // Estimating the number of segments needed for a smooth circle
+        int segmentCount = (int)(6 * (float)Math.cbrt(radius * getParent().getScaleX()));
+        float segmentWidth = MathUtils.PI2 / segmentCount;
+        float angle = 0;
+        Vector2 centerV = obtainV2().set(x, y);
+        Vector2 oldV = obtainV2().set(x, y + radius);
+        Vector2 newV = obtainV2();
+
+        for(int i = 0; i < segmentCount; i++) {
+            angle += segmentWidth;
+            newV.set(x + (float)Math.sin(angle) * radius, y + (float)Math.cos(angle) * radius);
+            drawTriangle(centerV, oldV, newV, color);
+            oldV.set(newV);
+        }
+        freeAll();
     }
 
     private class Selection {

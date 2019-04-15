@@ -1,24 +1,44 @@
 package com.mygdx.hitboxcreator.utils;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Cursor;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.VertexAttribute;
+import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.graphics.g2d.PolygonRegion;
+import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
+import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.BoxShapeBuilder;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.mygdx.hitboxcreator.App;
+
+import java.util.Arrays;
 
 public class HitRectangle extends HitShape {
     private Color cLeft, cRight, cBottom, cTop;
 
+
+
     public HitRectangle(float x, float y, float width, float height) {
+
+
+
+
         setBounds(x, y, width, height);
 
-        initShapeRenderer();
+
+
+
+
+
+
 
         highlightBorder();
         drawBorder = true;
@@ -85,7 +105,6 @@ public class HitRectangle extends HitShape {
 
 
 
-
     @Override
     boolean contains(float x, float y) {
         return x >= -grabArea && x < getWidth()+grabArea && y >= -grabArea && y < getHeight()+grabArea;
@@ -127,22 +146,34 @@ public class HitRectangle extends HitShape {
 
 
 
+
+
     @Override
     public void draw(Batch batch, float parentAlpha) {
-        //shapes.set(ShapeRenderer.ShapeType.Filled);
-        shapes.setColor(cBody);
-        shapes.rect(getX(), getY(), getOriginX(), getOriginY(), getWidth(), getHeight(), getScaleX(), getScaleY(), getRotation());
-
+        drawRect(getX(), getY(), getWidth(), getHeight(), cBody);
         if (drawBorder) {
-            shapes.setColor(cTop);
-            shapes.rectLine(getX(), getTop(), getRight(), getTop(), borderWidth);
-            shapes.setColor(cRight);
-            shapes.rectLine(getRight(), getTop(), getRight(), getY(), borderWidth);
-            shapes.setColor(cBottom);
-            shapes.rectLine(getRight(), getY(), getX(), getY(), borderWidth);
-            shapes.setColor(cLeft);
-            shapes.rectLine(getX(), getY(), getX(), getTop(), borderWidth);
+            drawRectLine(getX(), getTop(), getRight(), getTop(), borderWidth, cTop);
+            drawRectLine(getRight(), getTop(), getRight(), getY(), borderWidth, cRight);
+            drawRectLine(getRight(), getY(), getX(), getY(), borderWidth, cBottom);
+            drawRectLine(getX(), getY(), getX(), getTop(), borderWidth, cLeft);
         }
+    }
+
+    /** Draws a rotated rectangle, where one edge is centered at x1, y1 and the opposite edge centered at x2, y2. */
+    private void drawRectLine(float x1, float y1, float x2, float y2, float width, Color color) {
+        width *= 0.5f;
+        Vector2 t = obtainV2().set(y2 - y1, x1 - x2).nor();
+        float tx = t.x * width;
+        float ty = t.y * width;
+        drawTriangle(obtainV2().set(x1 + tx, y1 + ty), obtainV2().set(x1 - tx, y1 - ty), obtainV2().set(x2 + tx, y2 + ty), color);
+        drawTriangle(obtainV2().set(x2 - tx, y2 - ty), obtainV2().set(x2 + tx, y2 + ty), obtainV2().set(x1 - tx, y1 - ty), color);
+        freeAll();
+    }
+
+    private void drawRect(float x, float y, float width, float height, Color color) {
+        drawTriangle(obtainV2().set(x, y), obtainV2().set(x, y + height), obtainV2().set(x + width, y + height), color);
+        drawTriangle(obtainV2().set(x, y), obtainV2().set(x + width, y + height), obtainV2().set(x + width, y), color);
+        freeAll();
     }
 
 

@@ -4,6 +4,7 @@ import com.badlogic.gdx.Files.FileType;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
+import com.github.czyzby.autumn.fcs.scanner.DesktopClassScanner;
 import com.mygdx.hitboxcreator.App;
 
 /** Launches the desktop (LWJGL) application. */

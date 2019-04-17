@@ -1,14 +1,14 @@
 package com.mygdx.hitboxcreator.views;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.mygdx.hitboxcreator.App;
+import com.mygdx.hitboxcreator.events.EventDispatcher;
+import com.mygdx.hitboxcreator.events.InfoPropertyChangedEvent;
 import com.mygdx.hitboxcreator.utils.HitCircle;
 import com.mygdx.hitboxcreator.utils.HitRectangle;
 import com.mygdx.hitboxcreator.utils.HitShape;
@@ -22,23 +22,26 @@ public class ScaleGroup2 extends Group {
     private ProjectModel project;
     private Texture tObject;
     private Image imgObject = new Image();
+    private EventDispatcher eventDispatcher;
 
     public ScaleGroup2() {
         addActor(imgObject);
+        eventDispatcher = App.inst().getEventDispatcher();
 
+        addHitShape(new HitRectangle(100, 100, 100, 200));
 
-        project = new ProjectModel();
-        setImage(Gdx.files.internal("obstacle3_intact.png").path());
+        //project = new ProjectModel();
+        //reloadImage(Gdx.files.internal("obstacle3_intact.png").path());
 
         //addHitShape(new HitRectangle(50, 50, 200, 100));
-        addHitShape(new HitRectangle(100, 100, 100, 200));
+        //addHitShape(new HitRectangle(100, 100, 100, 200));
 
         addHitShape(new HitCircle(400,100,50));
     }
 
 
     public void addHitShape(HitShape hitShape) {
-        project.addHitShape(hitShape);
+        //project.addHitShape(hitShape);
         addActor(hitShape);
     }
 
@@ -53,32 +56,38 @@ public class ScaleGroup2 extends Group {
         for (HitShape hitShape : project.getHitShapes()) {
             addActor(hitShape);
         }
-        setImage(project.getImage());
+        reloadImage(project.getImage());
     }
 
-    public void setImage(String imgPath) {
+    public void reloadImage(String imgPath) {
         if (tObject != null) tObject.dispose();
         tObject = new Texture(imgPath);
         imgObject.setDrawable(new TextureRegionDrawable(new TextureRegion(tObject)));
         imgObject.setSize(tObject.getWidth(), tObject.getHeight());
         setSize(tObject.getWidth(), tObject.getHeight());
 
-        project.setImage(imgPath);
+        centerOnParent();
+
+
+        //TODO: dispose texture
     }
 
+    /** Centers group on parent. */
+    public void centerOnParent() {
+        centerOnParent(getWidth() / 2, getHeight() / 2);
+    }
 
-    /**
-     *  Draws the object, HitShapes and a border around the object for positioning reference.
-     *  Although it calls drawChildren(batch, alpha) the HitShapes and border are actually drawn
-     *  by a ShapeRenderer that belongs to App. This group and all HitShapes are referencing it.
-     *  ShapeRenderer has to be set up (ProjectionMatrix and groupTransform) and started.
-     *
-     */
+    /** Centers the specified point of the group on the parent. */
+    public void centerOnParent(float x, float y) {
+        setPosition((getParent().getWidth() / 2) - x, (getParent().getHeight() / 2) - y);
+    }
+
     @Override
-    public void draw(Batch batch, float parentAlpha) {
-        super.draw(batch, parentAlpha);
-        App.inst().getShader().setTransformMatrix(computeTransform());
+    protected void sizeChanged() {
+
     }
+
+
 
 
 }

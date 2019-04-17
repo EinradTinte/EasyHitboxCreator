@@ -4,6 +4,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.PolygonRegion;
+import com.badlogic.gdx.graphics.g2d.PolygonSprite;
+import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -18,7 +21,7 @@ public class HitCircle extends HitShape {
     private int borderArea;
     private final float minRadius = 5;
 
-
+    private PolygonSprite spBody, spBorder;
 
     private final int top = 1;
     private final int topRight = 2;
@@ -33,11 +36,13 @@ public class HitCircle extends HitShape {
         this.radius = radus;
         setBounds(x - radius, y - radius, radius * 2, radius * 2);
 
-
+        setRegion();
 
         highlightBorder();
         drawBorder = true;
         grabArea = 6;
+
+        somethingChanged();
 
         //region --- inputListener ---
         addListener(new HitShapeInputListener() {
@@ -137,12 +142,14 @@ public class HitCircle extends HitShape {
                     */
                 }
 
-
+                somethingChanged();
                 lastPos.set(x-mx, y-my);
             }
         });
         //endregion
     }
+
+
 
     @Override
     void highlightBorder() {
@@ -178,62 +185,95 @@ public class HitCircle extends HitShape {
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
-
-
-        drawCircle(getX() + radius, getY() + radius, radius, cBody);
+        spBody.setColor(cBody);
+        spBody.draw((PolygonSpriteBatch) batch);
         if (drawBorder) {
-            drawRing(getX() + radius, getY() + radius, radius, borderWidth, cBorder);
+            spBorder.setColor(cBorder);
+            spBorder.draw((PolygonSpriteBatch) batch);
         }
     }
 
+    @Override
+    float[] getData() {
+        return new float[] {getX() + radius, getY() + radius, radius};
+    }
 
-    /** Draws a ring with its width centered at radius */
-    void drawRing(float x, float y, float radius, float width, Color color) {
+    @Override
+    void somethingChanged() {
+        super.somethingChanged();
+        spBody = prepareSprite(drawCircle(getX() + radius, getY() + radius, radius));
+        spBorder = prepareSprite(drawRing(getX() + radius, getY() + radius, radius, borderWidth));
+    }
+
+    private PolygonSprite prepareSprite(PolygonRegion polygonRegion) {
+        return new PolygonSprite(polygonRegion);
+    }
+
+
+
+    /** Creates a PolygonRegion of a ring with its width centered at radius */
+    private PolygonRegion drawRing(float x, float y, float radius, float width) {
         int segmentCount = calculateSegmentCount(radius);
+        float[] vertices = new float[(segmentCount*2 +2)*HitShape.NUM_COMPONENTS];
+        short[] triangles = new short[(segmentCount*2)*3];
         float segmentWidth = MathUtils.PI2 / segmentCount;
         float angle = 0;
         float radiusInner = radius - width/2;
         float radiusOuter = radius + width/2;
         float sin, cos;
-        Vector2 oldInnerV = obtainV2().set(x, y + radiusInner);
-        Vector2 oldOuterV = obtainV2().set(x, y + radiusOuter);
-        Vector2 newInnerV = obtainV2();
-        Vector2 newOuterV = obtainV2();
+        setVertex(vertices, 0, x, y + radiusInner);
+        setVertex(vertices, 1, x, y + radiusOuter);
 
         for (int i = 0; i < segmentCount; i++) {
             angle += segmentWidth;
             sin = (float)Math.sin(angle);
             cos = (float)Math.cos(angle);
-            newInnerV.set(x + sin * radiusInner, y + cos * radiusInner);
-            newOuterV.set(x + sin * radiusOuter, y + cos * radiusOuter);
-            drawTriangle(oldInnerV, oldOuterV, newOuterV, color);
-            drawTriangle(oldInnerV, newOuterV, newInnerV, color);
-            oldInnerV.set(newInnerV);
-            oldOuterV.set(newOuterV);
+            setVertex(vertices, i*2 +2, x + sin * radiusInner, y + cos * radiusInner);
+            setVertex(vertices, i*2 +3, x + sin * radiusOuter, y + cos * radiusOuter);
+            //TODO: can I shorten this (maybe into one array per triangle) ??
+            triangles[i*6] = (short)(i*2);
+            triangles[i*6 +1] = (short)(i*2 +1);
+            triangles[i*6 +2] = (short)(i*2 +2);
+            triangles[i*6 +3] = (short)(i*2 +1);
+            triangles[i*6 +4] = (short)(i*2 +3);
+            triangles[i*6 +5] = (short)(i*2 +2);
         }
-        freeAll();
+
+        return new PolygonRegion(region, vertices, triangles);
     }
 
-    void drawCircle(float x, float y, float radius, Color color) {
+
+
+    /**
+     * Creates a PolygonRegion of a Circle consisting of indexed triangles.
+     * @param x
+     * @param y
+     * @param radius
+     * @return
+     */
+    private PolygonRegion drawCircle(float x, float y, float radius) {
         int segmentCount = calculateSegmentCount(radius);
+        float[] vertices = new float[(segmentCount + 2)*HitShape.NUM_COMPONENTS];
+        short[] triangles = new short[segmentCount*3];
         float segmentWidth = MathUtils.PI2 / segmentCount;
         float angle = 0;
-        Vector2 centerV = obtainV2().set(x, y);
-        Vector2 oldV = obtainV2().set(x, y + radius);
-        Vector2 newV = obtainV2();
-
+        setVertex(vertices, 0, x, y);
+        setVertex(vertices, 1, x, y + radius);
         for(int i = 0; i < segmentCount; i++) {
             angle += segmentWidth;
-            newV.set(x + (float)Math.sin(angle) * radius, y + (float)Math.cos(angle) * radius);
-            drawTriangle(centerV, oldV, newV, color);
-            oldV.set(newV);
+            setVertex(vertices, i +2, x + (float)Math.sin(angle) * radius, y + (float)Math.cos(angle) * radius);
+            triangles[i*3] = 0;
+            triangles[i*3 +1] = (short)(i+1);
+            triangles[i*3 +2] = (short)(i+2);
         }
-        freeAll();
+
+        return new PolygonRegion(region, vertices, triangles);
     }
 
     /** Estimating the number of segments needed for a smooth circle */
-    int calculateSegmentCount(float radius) {
-        return (int)(7 * (float)Math.cbrt(radius * getParent().getScaleX()));
+    private int calculateSegmentCount(float radius) {
+        if (getParent() == null) return 20;
+        else return (int)(3 * (float)Math.cbrt(radius * getParent().getScaleX()));
     }
 
     private class Selection {

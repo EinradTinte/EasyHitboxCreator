@@ -1,28 +1,28 @@
 package com.mygdx.hitboxcreator.utils;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.VertexAttribute;
-import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.PolygonRegion;
+import com.badlogic.gdx.graphics.g2d.PolygonSprite;
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
-import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.BoxShapeBuilder;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.mygdx.hitboxcreator.App;
-
-import java.util.Arrays;
 
 public class HitRectangle extends HitShape {
     private Color cLeft, cRight, cBottom, cTop;
+
+
+    private Vector2 tmpV = new Vector2();
+
+
+    private short[] triangles = {0,1,2, 0,2,3};
+
+
+
+    private PolygonSprite spBody, spLeft, spRight, spTop, spBottom;
 
 
 
@@ -34,8 +34,7 @@ public class HitRectangle extends HitShape {
         setBounds(x, y, width, height);
 
 
-
-
+        setRegion();
 
 
 
@@ -43,6 +42,9 @@ public class HitRectangle extends HitShape {
         highlightBorder();
         drawBorder = true;
         grabArea = 6;
+
+        // actually at this point parent is not yet set so we have to look for this in the calculateSegmentCount() method
+        somethingChanged();
 
         //region --- inputListener ---
         addListener(new HitShapeInputListener() {
@@ -97,6 +99,7 @@ public class HitRectangle extends HitShape {
                 }
 
 
+                somethingChanged();
                 lastPos.set(x-mx, y-my);
             }
         });
@@ -145,35 +148,70 @@ public class HitRectangle extends HitShape {
     }
 
 
+    @Override
+    float[] getData() {
+        return new float[] {getX(), getY(), getWidth(), getHeight()};
+    }
 
-
+    @Override
+    void somethingChanged() {
+        super.somethingChanged();
+        spBody = prepareSprite(drawRect(getX(), getY(), getWidth(), getHeight()), triangles);
+        spLeft = prepareSprite(drawRectLine(getX(), getY(), getX(), getTop(), borderWidth), triangles);
+        spTop = prepareSprite(drawRectLine(getX(), getTop(), getRight(), getTop(), borderWidth), triangles);
+        spRight = prepareSprite(drawRectLine(getRight(), getTop(), getRight(), getY(), borderWidth), triangles);
+        spBottom = prepareSprite(drawRectLine(getX(), getY(), getRight(), getY(), borderWidth), triangles);
+    }
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
-        drawRect(getX(), getY(), getWidth(), getHeight(), cBody);
+        spBody.setColor(cBody);
+        spBody.draw((PolygonSpriteBatch) batch);
         if (drawBorder) {
-            drawRectLine(getX(), getTop(), getRight(), getTop(), borderWidth, cTop);
-            drawRectLine(getRight(), getTop(), getRight(), getY(), borderWidth, cRight);
-            drawRectLine(getRight(), getY(), getX(), getY(), borderWidth, cBottom);
-            drawRectLine(getX(), getY(), getX(), getTop(), borderWidth, cLeft);
+            spLeft.setColor(cLeft);
+            spLeft.draw((PolygonSpriteBatch) batch);
+            spTop.setColor(cTop);
+            spTop.draw((PolygonSpriteBatch) batch);
+            spRight.setColor(cRight);
+            spRight.draw((PolygonSpriteBatch) batch);
+            spBottom.setColor(cBottom);
+            spBottom.draw((PolygonSpriteBatch) batch);
         }
+
+    }
+
+    /** Creating a PolygonSprite out of Triangles.
+     *
+     * @param vertices
+     * @param triangles
+     * @return
+     */
+    private PolygonSprite prepareSprite(float[] vertices, short[] triangles) {
+        PolygonRegion polyReg = new PolygonRegion(region, vertices, triangles);
+        return new PolygonSprite(polyReg);
     }
 
     /** Draws a rotated rectangle, where one edge is centered at x1, y1 and the opposite edge centered at x2, y2. */
-    private void drawRectLine(float x1, float y1, float x2, float y2, float width, Color color) {
+    private float[] drawRectLine(float x1, float y1, float x2, float y2, float width) {
+        float[] vertices = new float[4*HitShape.NUM_COMPONENTS];
         width *= 0.5f;
-        Vector2 t = obtainV2().set(y2 - y1, x1 - x2).nor();
+        Vector2 t = tmpV.set(y2 - y1, x1 - x2).nor();
         float tx = t.x * width;
         float ty = t.y * width;
-        drawTriangle(obtainV2().set(x1 + tx, y1 + ty), obtainV2().set(x1 - tx, y1 - ty), obtainV2().set(x2 + tx, y2 + ty), color);
-        drawTriangle(obtainV2().set(x2 - tx, y2 - ty), obtainV2().set(x2 + tx, y2 + ty), obtainV2().set(x1 - tx, y1 - ty), color);
-        freeAll();
+        setVertex(vertices, 0, x1 + tx, y1 + ty);
+        setVertex(vertices, 1, x1 - tx, y1 - ty);
+        setVertex(vertices, 2, x2 - tx, y2 - ty);
+        setVertex(vertices, 3, x2 + tx, y2 + ty);
+        return vertices;
     }
 
-    private void drawRect(float x, float y, float width, float height, Color color) {
-        drawTriangle(obtainV2().set(x, y), obtainV2().set(x, y + height), obtainV2().set(x + width, y + height), color);
-        drawTriangle(obtainV2().set(x, y), obtainV2().set(x + width, y + height), obtainV2().set(x + width, y), color);
-        freeAll();
+    private float[] drawRect(float x, float y, float width, float height) {
+        float[] vertices = new float[4*HitShape.NUM_COMPONENTS];
+        setVertex(vertices, 0, x, y);
+        setVertex(vertices, 1, x, y + height);
+        setVertex(vertices, 2, x + width, y + height);
+        setVertex(vertices, 3, x + width, y);
+        return vertices;
     }
 
 

@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -14,6 +15,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -25,11 +27,20 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.I18NBundle;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.github.czyzby.autumn.annotation.Initiate;
+import com.github.czyzby.autumn.context.Context;
+import com.github.czyzby.autumn.context.ContextDestroyer;
+import com.github.czyzby.autumn.context.ContextInitializer;
+import com.github.czyzby.autumn.scanner.ClassScanner;
+import com.github.czyzby.kiwi.util.gdx.asset.Disposables;
 import com.github.czyzby.lml.parser.LmlParser;
 import com.github.czyzby.lml.util.LmlApplicationListener;
 import com.github.czyzby.lml.vis.util.VisLml;
 import com.kotcrab.vis.ui.VisUI;
+import com.mygdx.hitboxcreator.events.EventDispatcher;
 import com.mygdx.hitboxcreator.lml.AppLmlSyntax;
+import com.mygdx.hitboxcreator.utils.ModelService;
+import com.mygdx.hitboxcreator.views.MainController;
 import com.mygdx.hitboxcreator.views.MainView;
 import com.mygdx.hitboxcreator.views.Shader;
 
@@ -40,7 +51,7 @@ public class App extends LmlApplicationListener {
     public static final int WIDTH = 900, HEIGHT = 400;
 
 
-    private SpriteBatch batch;
+    private PolygonSpriteBatch batch;
     private Viewport viewport;
 
 
@@ -49,15 +60,17 @@ public class App extends LmlApplicationListener {
 
     private  Skin skin;
 
-
+    private TextureRegion region;
 
     private BitmapFont font;
     private Cursor cMove, cResize_ne, cResize_nw;
 
-    private Shader shader;
 
 
 
+
+    private ModelService modelService;
+    private EventDispatcher eventDispatcher;
 
 
 
@@ -76,20 +89,19 @@ public class App extends LmlApplicationListener {
     @Override
     public void create() {
 
-        shader = new Shader();
+        Gdx.graphics.setContinuousRendering(false);
+
+        eventDispatcher = new EventDispatcher();
+        modelService = new ModelService();
+
+        region = new TextureRegion(new Texture("white.png"));
 
 
-        batch = new SpriteBatch();
+
+
+        batch = new PolygonSpriteBatch();
         viewport = new ScreenViewport();
-        stage = new Stage(viewport, batch) {
-            @Override
-            public void draw() {
-                super.draw();
-
-                shader.setProjectionMatrix(getCamera().combined);
-                shader.flush();
-            }
-        };
+        stage = new Stage(viewport, batch);
 
 
 
@@ -110,11 +122,18 @@ public class App extends LmlApplicationListener {
 
         initiateSkin();
 
-
+        // calls createParser() & addDefaultActions()
         super.create();
+
         setView(MainView.class);
         //saveDtdSchema(Gdx.files.local("lml.dtd"));
+
+        ((MainView) getCurrentView()).initialize();
     }
+
+
+
+
 
     @Override
     protected LmlParser createParser() {
@@ -168,6 +187,9 @@ public class App extends LmlApplicationListener {
         return true;
     }
 
+    public TextureRegion getRegion() { return region; }
+    public EventDispatcher getEventDispatcher() { return eventDispatcher; }
+    public ModelService getModelService() { return modelService; }
     public Stage getStage() {return stage;}
 
     public Batch getBatch() {
@@ -208,20 +230,22 @@ public class App extends LmlApplicationListener {
 
 
 
-    public Shader getShader() {
-        return shader;
-    }
+
 
 
 
     @Override
     public void dispose() {
+        // calls dispose() on each stored view
+        super.dispose();
+
+
         batch.dispose();
         cMove.dispose();
         cResize_ne.dispose();
         cResize_nw.dispose();
 
-
+        region.getTexture().dispose();
 
         VisUI.dispose();
     }
@@ -236,4 +260,6 @@ public class App extends LmlApplicationListener {
         static public final int Arrow = 7;
         static public final int Hand = 8;
     }
+
+
 }

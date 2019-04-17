@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.github.czyzby.autumn.annotation.Inject;
 import com.github.czyzby.lml.annotation.LmlAction;
 import com.github.czyzby.lml.annotation.LmlActor;
 import com.github.czyzby.lml.parser.impl.AbstractLmlView;
@@ -21,25 +22,30 @@ import com.kotcrab.vis.ui.widget.file.FileChooser;
 import com.kotcrab.vis.ui.widget.file.FileTypeFilter;
 import com.kotcrab.vis.ui.widget.file.SingleFileChooserListener;
 import com.mygdx.hitboxcreator.App;
+import com.mygdx.hitboxcreator.events.Event;
+import com.mygdx.hitboxcreator.events.EventDispatcher;
+import com.mygdx.hitboxcreator.events.EventListener;
+import com.mygdx.hitboxcreator.utils.ModelService;
 
 
 public class MainView extends AbstractLmlView {
 
+    private ModelService modelService;
+    private EventDispatcher eventDispatcher;
+    private EditorController editorController;
+
     @LmlActor("btnOutputSettings") VisImageButton btnOutputSettings;
     @LmlActor("btnOutputSelectAll") VisImageButton btnOutputSelectAll;
     @LmlActor("edtImgPath") VisTextField edtImgPath;
+    @LmlActor("editor") Editor editor;
 
-    FileChooser fileChooser;
-    FileTypeFilter typeFilterImg;
-    FileChooser.FileIconProvider fileIconProvider;
+    private FileChooser fileChooser;
+    private FileTypeFilter typeFilterImg;
 
 
+    //region -- view --
     public MainView() {
         super(App.inst().getStage());
-        //getStage().setDebugAll(true);
-
-        initiateFileChooser();
-
     }
 
     @Override
@@ -51,6 +57,16 @@ public class MainView extends AbstractLmlView {
     public String getViewId() {
         return "main";
     }
+    //endregion view
+
+
+    public void initialize() {
+        modelService = App.inst().getModelService();
+        eventDispatcher = App.inst().getEventDispatcher();
+        initiateFileChooser();
+        editorController = new EditorController(editor);
+    }
+
 
     @LmlAction("outputSettings") void outputSettings() {
 
@@ -64,7 +80,18 @@ public class MainView extends AbstractLmlView {
         getStage().addActor(fileChooser.fadeIn());
     }
 
-    public void initiateFileChooser() {
+
+    private void initEventListener() {
+        eventDispatcher.addEventListener(new EventListener() {
+            @Override
+            public void receiveEvent(Event event) {
+
+            }
+        });
+    }
+
+
+    private void initiateFileChooser() {
         typeFilterImg = new FileTypeFilter(false);
         typeFilterImg.addRule("Image files (*.png, *.jpg)", "png", "jpg");
 
@@ -86,11 +113,19 @@ public class MainView extends AbstractLmlView {
         fileChooser.setListener(new SingleFileChooserListener() {
             @Override
             protected void selected(FileHandle fileHandle) {
-                edtImgPath.setText(fileHandle.file().getAbsolutePath());
+                String imgPath = fileHandle.file().getAbsolutePath();
+                edtImgPath.setText(imgPath);
+                modelService.getProject().setImage(imgPath);
             }
         });
 
         // TODO: dispose IconProvider on shutdown
     }
 
+    @Override
+    public void dispose() {
+        super.dispose();
+
+
+    }
 }

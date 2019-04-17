@@ -15,6 +15,7 @@ import com.github.czyzby.lml.parser.tag.LmlActorBuilder;
 import com.github.czyzby.lml.parser.tag.LmlTag;
 import com.github.czyzby.lml.parser.tag.LmlTagProvider;
 import com.mygdx.hitboxcreator.App;
+import com.mygdx.hitboxcreator.utils.ProjectModel;
 
 public class Editor extends Stack {
 
@@ -64,7 +65,7 @@ public class Editor extends Stack {
         }
     }
 
-    public void reloadProject() {
+    public void reloadProject(ProjectModel project) {
 
     }
 
@@ -76,6 +77,8 @@ public class Editor extends Stack {
 
     }
 
+    public InfoPanel getInfoPanel() { return infoPanel; }
+    public CanvasHolder getCanvasHolder() { return canvasHolder; }
 
     // Apply scissors
     @Override
@@ -83,7 +86,6 @@ public class Editor extends Stack {
         batch.flush();
         // calculating scisscors because we only want to draw in the editor window
         getStage().calculateScissors(widgetAreaBounds.set(getX(), getY(), getWidth(), getHeight()), scissorBounds);
-        App.inst().getShader().setScissorBounds(scissorBounds);
         if (ScissorStack.pushScissors(scissorBounds)) {
             super.draw(batch, parentAlpha);
             batch.flush();

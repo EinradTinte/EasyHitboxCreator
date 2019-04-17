@@ -1,7 +1,9 @@
 package com.mygdx.hitboxcreator.utils;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
@@ -12,11 +14,13 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.utils.FlushablePool;
 import com.mygdx.hitboxcreator.App;
+import com.mygdx.hitboxcreator.events.EventDispatcher;
+import com.mygdx.hitboxcreator.events.HitShapesChangedEvent;
 import com.mygdx.hitboxcreator.views.Shader;
 
 public abstract class HitShape extends Actor {
 
-    Shader shader = App.inst().getShader();
+
     Color cBody;
     static Color cBodyNormal = new Color(1,0,0,0.5F);
     static Color cBodySelected = new Color(1,0.2F,0,0.5F);
@@ -27,7 +31,10 @@ public abstract class HitShape extends Actor {
     static float borderWidth = 2;
     int selection;
 
+    TextureRegion region;
+    EventDispatcher eventDispatcher = App.inst().getEventDispatcher();
 
+    static final int NUM_COMPONENTS = 2;
 
 
 
@@ -94,32 +101,35 @@ public abstract class HitShape extends Actor {
         }
     }
 
+    /** Dispatches event when HitShape gets altered.
+     * Subclasses will also use this method to update their PolygonSprites.
+     * In this case make sure to call super.somethingChanged() !
+     */
+    void somethingChanged() {
+        eventDispatcher.postEvent(new HitShapesChangedEvent(HitShapesChangedEvent.Action.FORM_CHANGED));
+    }
 
-    /** Loads a  triangle to the shaders mesh which represents the HitShapes */
-    void drawTriangle(Vector2 corner00, Vector2 corner01, Vector2 corner11, Color color) {
-        float colorBits = color.toFloatBits();
-
-        shader.vertex(corner00.x, corner00.y, colorBits);
-        shader.vertex(corner01.x, corner01.y, colorBits);
-        shader.vertex(corner11.x, corner11.y, colorBits);
+    /** To create a PolygonSprite that we can draw, we need a TextureRegion (1x1px & white).
+     * We load it once in the main class and refer to it. */
+    void setRegion() {
+        region = App.inst().getRegion();
     }
 
 
-    private final static FlushablePool<Vector2> vectorPool = new FlushablePool<Vector2>() {
-        @Override
-        protected Vector2 newObject () {
-            return new Vector2();
-        }
-    };
 
-    /** Obtain a temporary {@link Vector2} object, must be free'd using {@link #freeAll()}. */
-    protected static Vector2 obtainV2 () {
-        return vectorPool.obtain();
+    /** One vertex consists of only x & y coordinate. This is a simple helper method to avoid mixing
+     * idx up.
+     * @param vertices Float array in which the vertices will be set.
+     * @param idx  Index of vertex. CAUTION: Vertices has a size of vertexCount * number of vertexComponents.
+     *             Idx is the vertex you want to set. The method then calculates which array index that
+     *             actually is.
+     */
+    void setVertex(float[] vertices, int idx, float x, float y) {
+        vertices[idx*NUM_COMPONENTS] = x;
+        vertices[idx*NUM_COMPONENTS + 1] = y;
     }
 
-    /** Free all objects obtained using one of the `obtainXX` methods. */
-    protected static void freeAll () {
-        vectorPool.flush();
-    }
+
+    abstract float[] getData();
 
 }

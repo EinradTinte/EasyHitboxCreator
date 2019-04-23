@@ -1,4 +1,4 @@
-package com.mygdx.hitboxcreator.utils;
+package com.mygdx.hitboxcreator.services;
 
 
 import com.mygdx.hitboxcreator.App;
@@ -6,6 +6,7 @@ import com.mygdx.hitboxcreator.events.Event;
 import com.mygdx.hitboxcreator.events.EventDispatcher;
 import com.mygdx.hitboxcreator.events.EventListener;
 import com.mygdx.hitboxcreator.events.ProjectSerializerEvent;
+import com.mygdx.hitboxcreator.utils.ProjectModel;
 
 public class ModelService {
 
@@ -42,7 +43,7 @@ public class ModelService {
 
         updateProjectStateHash();
 
-        //eventDispatcher.postEvent();
+        eventDispatcher.postEvent(new ProjectSerializerEvent(ProjectSerializerEvent.Action.LOADED, projectModel, projectModel.getProjectFile()));
     }
 
     public boolean hasProjectChanged() {

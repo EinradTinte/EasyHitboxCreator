@@ -11,6 +11,9 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.mygdx.hitboxcreator.App;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 public class HitRectangle extends HitShape {
     private Color cLeft, cRight, cBottom, cTop;
 
@@ -23,6 +26,9 @@ public class HitRectangle extends HitShape {
 
 
     private PolygonSprite spBody, spLeft, spRight, spTop, spBottom;
+
+    // Order in which attributes get passed
+    public static ArrayList<String> attributes = new ArrayList<>(Arrays.asList("X", "Y", "WIDTH", "HEIGHT"));
 
 
 
@@ -37,14 +43,15 @@ public class HitRectangle extends HitShape {
         setRegion();
 
 
-
+        addPopupMenu();
 
         highlightBorder();
         drawBorder = true;
-        grabArea = 6;
+
 
         // actually at this point parent is not yet set so we have to look for this in the calculateSegmentCount() method
         somethingChanged();
+
 
         //region --- inputListener ---
         addListener(new HitShapeInputListener() {
@@ -104,9 +111,14 @@ public class HitRectangle extends HitShape {
             }
         });
         //endregion
+
     }
 
 
+    @Override
+    public OutputFormat.Type getType() {
+        return OutputFormat.Type.RECTANGLE;
+    }
 
     @Override
     boolean contains(float x, float y) {
@@ -149,7 +161,7 @@ public class HitRectangle extends HitShape {
 
 
     @Override
-    float[] getData() {
+    public float[] getData() {
         return new float[] {getX(), getY(), getWidth(), getHeight()};
     }
 
@@ -228,4 +240,6 @@ public class HitRectangle extends HitShape {
         static final int bottomRight = bottom | right;
         static final int bottomLeft = bottom | left;
     }
+
+
 }

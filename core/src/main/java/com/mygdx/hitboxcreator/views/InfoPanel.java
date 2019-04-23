@@ -6,12 +6,13 @@ import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Align;
-import com.github.czyzby.autumn.annotation.Inject;
-import com.github.czyzby.autumn.annotation.OnEvent;
-import com.github.czyzby.autumn.processor.event.EventDispatcher;
+import com.badlogic.gdx.utils.Array;
 import com.github.czyzby.lml.parser.LmlParser;
 import com.github.czyzby.lml.parser.impl.DefaultLmlParser;
 import com.mygdx.hitboxcreator.events.InfoPropertyChangedEvent;
+import com.mygdx.hitboxcreator.utils.HitCircle;
+import com.mygdx.hitboxcreator.utils.HitRectangle;
+import com.mygdx.hitboxcreator.utils.HitShape;
 
 public class InfoPanel extends Container {
 
@@ -19,6 +20,8 @@ public class InfoPanel extends Container {
 
     private final Label lblZoom;
     private final Label lblImgDimens;
+    private final Label lblRecCount;
+    private final Label lblCirCount;
 
     public InfoPanel(LmlParser parser) {
         align(Align.top);
@@ -32,6 +35,8 @@ public class InfoPanel extends Container {
 
         lblZoom = root.findActor("lblZoom");
         lblImgDimens = root.findActor("lblImgDimens");
+        lblRecCount = root.findActor("lblRecCount");
+        lblCirCount = root.findActor("lblCirCount");
     }
 
 
@@ -53,6 +58,15 @@ public class InfoPanel extends Container {
             lblImgDimens.setText("Can't load file.");
             throw new IllegalArgumentException("Can't load image file at "+imgPath);
         }
+    }
 
+    public void setHitShapeCount(Array<HitShape> hitshapes) {
+        int rectangleCount = 0, circleCount = 0;
+        for (HitShape hitShape : hitshapes) {
+            if (hitShape instanceof HitRectangle) rectangleCount++;
+            else if (hitShape instanceof HitCircle) circleCount++;
+        }
+        lblRecCount.setText(""+rectangleCount);
+        lblCirCount.setText(""+circleCount);
     }
 }

@@ -3,18 +3,34 @@
 
 <vistable background="canvasInfoPanel" tablealign="right" padright="8" defaultalign="left">
 
-	<vistable tooltip="canvasInfoTtPageDimen">
+	<vistable tooltip="@canvasInfoTtRectangleCount">
+		<!--<visimage style="custom/ic-small-dimens" color="light-grey"/>-->
+		<actor width="4"/>
+		<vislabel id="lblRecCount" style="small"/>
+	</vistable>
+
+	<actor width="12"/>
+
+	<vistable tooltip="@canvasInfoTtCircleCount">
+		<!--<visimage style="custom/ic-small-dimens" color="light-grey"/>-->
+		<actor width="4"/>
+		<vislabel id="lblCirCount" style="small" />
+	</vistable>
+
+	<actor width="12"/>
+
+	<vistable tooltip="@canvasInfoTtPageDimen">
 		<visimage style="custom/ic-small-dimens" color="light-grey"/>
 		<actor width="4"/>
-		<vislabel id="lblImgDimens" style="small" text="1024x256"/>
+		<vislabel id="lblImgDimens" style="small"/>
 	</vistable>
 
 	<actor width="12"/>
 	
-	<vistable tooltip="canvasInfoTtZoom">
+	<vistable tooltip="@canvasInfoTtZoom">
 		<visimage style="custom/ic-small-zoom" color="light-grey"/>
 		<actor width="4"/>
-		<vislabel id="lblZoom" style="small" text="100%"/>
+		<vislabel id="lblZoom" style="small"/>
 	</vistable>
 	
 

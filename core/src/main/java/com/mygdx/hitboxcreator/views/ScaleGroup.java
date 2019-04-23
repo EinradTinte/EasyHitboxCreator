@@ -1,13 +1,17 @@
 package com.mygdx.hitboxcreator.views;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.mygdx.hitboxcreator.App;
 import com.mygdx.hitboxcreator.events.EventDispatcher;
+import com.mygdx.hitboxcreator.events.HitShapesChangedEvent;
 import com.mygdx.hitboxcreator.events.InfoPropertyChangedEvent;
 import com.mygdx.hitboxcreator.utils.HitCircle;
 import com.mygdx.hitboxcreator.utils.HitRectangle;
@@ -17,18 +21,21 @@ import com.mygdx.hitboxcreator.utils.ProjectModel;
 
 
 
-public class ScaleGroup2 extends Group {
+public class ScaleGroup extends Group {
 
     private ProjectModel project;
     private Texture tObject;
     private Image imgObject = new Image();
     private EventDispatcher eventDispatcher;
 
-    public ScaleGroup2() {
-        addActor(imgObject);
+
+    public ScaleGroup() {
         eventDispatcher = App.inst().getEventDispatcher();
 
-        addHitShape(new HitRectangle(100, 100, 100, 200));
+        addActor(imgObject);
+
+
+
 
         //project = new ProjectModel();
         //reloadImage(Gdx.files.internal("obstacle3_intact.png").path());
@@ -36,23 +43,42 @@ public class ScaleGroup2 extends Group {
         //addHitShape(new HitRectangle(50, 50, 200, 100));
         //addHitShape(new HitRectangle(100, 100, 100, 200));
 
-        addHitShape(new HitCircle(400,100,50));
+
+    }
+
+    /** Circles calculate their segment count for smooth drawing according to their size and the groups
+     * scale. They do this in their somethingChanged() method that gets internally called on resize.
+     * But they can't detect zooming change, so we have to manually call this method.*/
+    public void redrawCircles() {
+        for (Actor actor : getChildren()) {
+            if (actor instanceof HitCircle) {
+                ((HitCircle) actor).somethingChanged();
+            }
+        }
     }
 
 
     public void addHitShape(HitShape hitShape) {
-        //project.addHitShape(hitShape);
+        project.addHitShape(hitShape);
         addActor(hitShape);
     }
 
-    public void removeHitShape(HitShape hitShape) {
-        removeActor(hitShape);
-        project.removeHitShape(hitShape);
+
+    @Override
+    public boolean removeActor(Actor actor, boolean unfocus) {
+        if (actor instanceof HitShape) project.removeHitShape((HitShape) actor);
+        return super.removeActor(actor, unfocus);
     }
 
+    @Override
+    protected void childrenChanged() {
+        eventDispatcher.postEvent(new HitShapesChangedEvent(HitShapesChangedEvent.Action.QUANTITY_CHANGED));
+    }
 
     public void reloadProject(ProjectModel project) {
+        this.project = project;
         clear();
+        addActor(imgObject);
         for (HitShape hitShape : project.getHitShapes()) {
             addActor(hitShape);
         }
@@ -61,13 +87,18 @@ public class ScaleGroup2 extends Group {
 
     public void reloadImage(String imgPath) {
         if (tObject != null) tObject.dispose();
-        tObject = new Texture(imgPath);
-        imgObject.setDrawable(new TextureRegionDrawable(new TextureRegion(tObject)));
-        imgObject.setSize(tObject.getWidth(), tObject.getHeight());
-        setSize(tObject.getWidth(), tObject.getHeight());
 
-        centerOnParent();
+        if (imgPath == null) {
+            imgObject.setDrawable(null);
+        } else {
 
+            tObject = new Texture(imgPath);
+            imgObject.setDrawable(new TextureRegionDrawable(new TextureRegion(tObject)));
+            imgObject.setSize(tObject.getWidth(), tObject.getHeight());
+            setSize(tObject.getWidth(), tObject.getHeight());
+
+            centerOnParent();
+        }
 
         //TODO: dispose texture
     }

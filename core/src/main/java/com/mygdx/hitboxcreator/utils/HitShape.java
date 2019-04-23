@@ -12,11 +12,17 @@ import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.FlushablePool;
+import com.kotcrab.vis.ui.widget.MenuItem;
+import com.kotcrab.vis.ui.widget.PopupMenu;
 import com.mygdx.hitboxcreator.App;
 import com.mygdx.hitboxcreator.events.EventDispatcher;
 import com.mygdx.hitboxcreator.events.HitShapesChangedEvent;
 import com.mygdx.hitboxcreator.views.Shader;
+
+import java.util.ArrayList;
 
 public abstract class HitShape extends Actor {
 
@@ -27,7 +33,7 @@ public abstract class HitShape extends Actor {
     static Color cBorderNormal = new Color(0,0,0,0.5F);
     static Color cBorderSelected = new Color(0,0,1,1);
     boolean drawBorder;
-    float grabArea;
+    float grabArea = 6;
     static float borderWidth = 2;
     int selection;
 
@@ -38,6 +44,20 @@ public abstract class HitShape extends Actor {
 
 
 
+    void addPopupMenu() {
+        PopupMenu popupMenu = new PopupMenu();
+        //String text = App.inst().getI18NBundle().format("menuItemCanvas");
+        MenuItem menuItem = new MenuItem("Delete");
+        menuItem.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent changeEvent, Actor actor) {
+                remove();
+            }
+        });
+        popupMenu.addItem(menuItem);
+
+        this.addListener(popupMenu.getDefaultInputListener());
+    }
 
 
     static void setColors(Color normalBody, Color selectedBody, Color normalBorder, Color selectedBorder) {
@@ -69,7 +89,7 @@ public abstract class HitShape extends Actor {
 
     abstract void highlightBorder();
 
-    abstract class Selection{}
+
 
     /**
      * exit() and touchDown() already defined.
@@ -99,6 +119,8 @@ public abstract class HitShape extends Actor {
             lastPos.set(x, y);
             return true;
         }
+
+
     }
 
     /** Dispatches event when HitShape gets altered.
@@ -130,6 +152,9 @@ public abstract class HitShape extends Actor {
     }
 
 
-    abstract float[] getData();
+    public abstract float[] getData();
+
+    public abstract OutputFormat.Type getType();
+
 
 }

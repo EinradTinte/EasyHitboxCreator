@@ -13,15 +13,9 @@
         </vistable>
 
         <vistable grow="true" pad="4">
-            <scrollpane overscroll="false" flick="false" barsontop="true" fadebars="false" disabledx="true" grow="true">
-                <scrollabletextarea id="outputTextArea" readonly="true">
-                    Das
-                    hier
-                    ist
-                    ein
-                    Beispiel
-                    Text.
-                    Muuuh!
+            <scrollpane overscroll="false" flick="false" barsontop="true" fadebars="false"  grow="true" >
+                <scrollabletextarea id="outputTextArea" readonly="true" style="small" focusborder="false">
+
                 </scrollabletextarea>
             </scrollpane>
         </vistable>

@@ -1,48 +1,33 @@
 package com.mygdx.hitboxcreator;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Cursor;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.VertexAttribute;
-import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.I18NBundle;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.github.czyzby.autumn.annotation.Initiate;
-import com.github.czyzby.autumn.context.Context;
-import com.github.czyzby.autumn.context.ContextDestroyer;
-import com.github.czyzby.autumn.context.ContextInitializer;
-import com.github.czyzby.autumn.scanner.ClassScanner;
-import com.github.czyzby.kiwi.util.gdx.asset.Disposables;
 import com.github.czyzby.lml.parser.LmlParser;
 import com.github.czyzby.lml.util.LmlApplicationListener;
 import com.github.czyzby.lml.vis.util.VisLml;
 import com.kotcrab.vis.ui.VisUI;
 import com.mygdx.hitboxcreator.events.EventDispatcher;
 import com.mygdx.hitboxcreator.lml.AppLmlSyntax;
-import com.mygdx.hitboxcreator.utils.ModelService;
-import com.mygdx.hitboxcreator.views.MainController;
+import com.mygdx.hitboxcreator.services.ModelService;
+import com.mygdx.hitboxcreator.utils.OutputBuilder;
 import com.mygdx.hitboxcreator.views.MainView;
-import com.mygdx.hitboxcreator.views.Shader;
+import com.mygdx.hitboxcreator.services.OutputFormatService;
+import com.mygdx.hitboxcreator.controller.OutputSettingsDialogController;
 
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
@@ -54,7 +39,7 @@ public class App extends LmlApplicationListener {
     private PolygonSpriteBatch batch;
     private Viewport viewport;
 
-
+    private I18NBundle strings;
 
     private Stage stage;
 
@@ -68,6 +53,7 @@ public class App extends LmlApplicationListener {
 
 
 
+    private OutputFormatService outputFormatService;
 
     private ModelService modelService;
     private EventDispatcher eventDispatcher;
@@ -89,10 +75,13 @@ public class App extends LmlApplicationListener {
     @Override
     public void create() {
 
-        Gdx.graphics.setContinuousRendering(false);
 
-        eventDispatcher = new EventDispatcher();
-        modelService = new ModelService();
+
+
+
+        //Gdx.graphics.setContinuousRendering(false);
+
+
 
         region = new TextureRegion(new Texture("white.png"));
 
@@ -113,20 +102,22 @@ public class App extends LmlApplicationListener {
         cResize_nw = Gdx.graphics.newCursor(new Pixmap(Gdx.files.internal("cursor/resize-nw.png")), 9, 9);
 
 
-
-
+        init();
 
         //stage.setDebugAll(true);
 
 
 
-        initiateSkin();
-
         // calls createParser() & addDefaultActions()
         super.create();
 
+
+
+
         setView(MainView.class);
         //saveDtdSchema(Gdx.files.local("lml.dtd"));
+
+        //getParser().createView(OutputSettingsDialogController.class, Gdx.files.internal("lml/outputSettingsDialog.lml"));
 
         ((MainView) getCurrentView()).initialize();
     }
@@ -139,8 +130,23 @@ public class App extends LmlApplicationListener {
     protected LmlParser createParser() {
         return VisLml.parser()
                 .syntax(new AppLmlSyntax())
-                .i18nBundle(I18NBundle.createBundle(Gdx.files.internal("i18n/bundle"))).build();
+                // registering action container class
+                //.actions("outputSettingsHandler", new OutputSettingsDialogController())
+                .i18nBundle(strings).build();
     }
+
+
+
+    private void init() {
+        eventDispatcher = new EventDispatcher();
+        modelService = new ModelService();
+        strings = I18NBundle.createBundle(Gdx.files.internal("i18n/bundle"));
+        outputFormatService = new OutputFormatService();
+        initiateSkin();
+    }
+
+
+
 
     public void initiateSkin() {
         skin = new Skin();
@@ -187,6 +193,8 @@ public class App extends LmlApplicationListener {
         return true;
     }
 
+    public I18NBundle getI18NBundle() { return strings; }
+    public OutputFormatService getOutputFormatService() { return outputFormatService; }
     public TextureRegion getRegion() { return region; }
     public EventDispatcher getEventDispatcher() { return eventDispatcher; }
     public ModelService getModelService() { return modelService; }

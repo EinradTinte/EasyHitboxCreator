@@ -14,6 +14,9 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.utils.Align;
 import com.mygdx.hitboxcreator.App;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 public class HitCircle extends HitShape {
     private float radius;
     private Color cBorder;
@@ -22,6 +25,11 @@ public class HitCircle extends HitShape {
     private final float minRadius = 5;
 
     private PolygonSprite spBody, spBorder;
+
+    // Order in which attributes get passed
+    public static ArrayList<String> attributes = new ArrayList<>(Arrays.asList("X", "Y", "RADIUS"));
+
+
 
     private final int top = 1;
     private final int topRight = 2;
@@ -40,7 +48,8 @@ public class HitCircle extends HitShape {
 
         highlightBorder();
         drawBorder = true;
-        grabArea = 6;
+
+        addPopupMenu();
 
         somethingChanged();
 
@@ -150,6 +159,10 @@ public class HitCircle extends HitShape {
     }
 
 
+    @Override
+    public OutputFormat.Type getType() {
+        return OutputFormat.Type.CIRCLE;
+    }
 
     @Override
     void highlightBorder() {
@@ -194,12 +207,12 @@ public class HitCircle extends HitShape {
     }
 
     @Override
-    float[] getData() {
+    public float[] getData() {
         return new float[] {getX() + radius, getY() + radius, radius};
     }
 
     @Override
-    void somethingChanged() {
+    public void somethingChanged() {
         super.somethingChanged();
         spBody = prepareSprite(drawCircle(getX() + radius, getY() + radius, radius));
         spBorder = prepareSprite(drawRing(getX() + radius, getY() + radius, radius, borderWidth));
@@ -273,7 +286,7 @@ public class HitCircle extends HitShape {
     /** Estimating the number of segments needed for a smooth circle */
     private int calculateSegmentCount(float radius) {
         if (getParent() == null) return 20;
-        else return (int)(3 * (float)Math.cbrt(radius * getParent().getScaleX()));
+        else return (int)(8 * (float)Math.cbrt(radius * getParent().getScaleX()));
     }
 
     private class Selection {

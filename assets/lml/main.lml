@@ -13,33 +13,36 @@
 			<:import path="lml/titledPane.lml"/>
 			<:import path="lml/sidebutton.lml"/>
 
-		    <container growy="true" fill="true" width="320">
-				<vissplitpane id="packListSplitPane" vertical="true" min="0.2" max="0.7" value="0.2">
+			<container grow="true" fill="true">
+				<vissplitpane id="mainSplitPane" horizontal="true " min="0.15" max="0.5" value="0.3">
+		    		<container  fill="true" >
+						<vissplitpane id="packListSplitPane" vertical="true" min="0.2" max="0.7" value="0.2">
 
-					<container fill="true">
-						<:titledpane id="titledPaneProject" title="@panelTitleProject" icon="custom/ic-title-packs">
-							<:import path="lml/paneProject.lml"/>
+							<container fill="true">
+								<:titledpane id="titledPaneProject" title="@panelTitleProject" icon="custom/ic-title-packs">
+									<:import path="lml/paneProject.lml"/>
+								</:titledpane>
+							</container>
+
+							<container fill="true">
+								<:titledpane id="titledPaneOutput" title="@panelTitleOutput" icon="custom/ic-title-exclamation">
+									<:import path="lml/paneOutput.lml"/>
+								</:titledpane>
+							</container>
+
+						</vissplitpane>
+		    		</container>
+
+
+		    		<container fill="true">
+		        		<:titledpane id="titledPaneAtlasPreview" title="@panelTitleEditor" icon="custom/ic-title-atlas">
+							<stack grow="true">
+								<editor id="editor"/>
+							</stack>
 						</:titledpane>
-					</container>
-
-					<container fill="true">
-						<:titledpane id="titledPaneOutput" title="@panelTitleOutput" icon="custom/ic-title-exclamation">
-							<:import path="lml/paneOutput.lml"/>
-						</:titledpane>
-					</container>
-
+		    		</container>
 				</vissplitpane>
-		    </container>
-
-			<separator growy="true"/>
-
-		    <container grow="true" fill="true">
-		        <:titledpane id="titledPaneAtlasPreview" title="@panelTitleEditor" icon="custom/ic-title-atlas">
-					<stack grow="true">
-						<editor id="editor"/>
-					</stack>
-				</:titledpane>
-		    </container>
+			</container>
 
 		</vistable>
 	</vistable>

@@ -10,10 +10,11 @@ import com.mygdx.hitboxcreator.events.ProjectPropertyChangedEvent;
 import com.mygdx.hitboxcreator.statehash.StateHashUtils;
 import com.mygdx.hitboxcreator.statehash.StateHashable;
 
+import java.util.ArrayList;
+
 public class ProjectModel implements StateHashable {
 
-    private final Array<HitRectangle> recs = new Array<HitRectangle>();
-    private final Array<HitCircle> circles = new Array<HitCircle>();
+    private final Array<HitShape> hitShapes = new Array<>();
     private FileHandle projectFile;
     private String imgPath;
 
@@ -48,30 +49,22 @@ public class ProjectModel implements StateHashable {
     public String getImage() { return imgPath;}
 
     public void addHitShape(HitShape hitShape) {
-        if (hitShape.getClass() == HitRectangle.class) {
-            recs.add((HitRectangle) hitShape);
-        } else if (hitShape.getClass() == HitCircle.class) {
-            circles.add((HitCircle) hitShape);
-        }
+        hitShapes.add(hitShape);
     }
 
 
 
     public void removeHitShape(HitShape hitShape) {
-        if (hitShape.getClass() == HitRectangle.class) {
-            recs.removeValue((HitRectangle) hitShape, true);
-        } else if (hitShape.getClass() == HitCircle.class) {
-            circles.removeValue((HitCircle) hitShape, true);
-        }
+            hitShapes.removeValue(hitShape, true);
     }
 
-    public HitShape[] getHitShapes() {
-        return recs.items;
+    public Array<HitShape> getHitShapes() {
+        return hitShapes;
     }
 
 
     @Override
     public int computeStateHash() {
-        return StateHashUtils.computeHash(projectFile, imgPath, recs, circles, cBodyNormal, cBodySelected, cBorderNormal, cBorderSelected);
+        return StateHashUtils.computeHash(projectFile, imgPath, hitShapes, cBodyNormal, cBodySelected, cBorderNormal, cBorderSelected);
     }
 }

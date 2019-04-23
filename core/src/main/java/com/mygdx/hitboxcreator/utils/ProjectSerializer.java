@@ -1,13 +1,13 @@
 package com.mygdx.hitboxcreator.utils;
 
 import com.badlogic.gdx.files.FileHandle;
-import com.github.czyzby.autumn.annotation.Inject;
-import com.github.czyzby.autumn.processor.event.EventDispatcher;
+
+import com.mygdx.hitboxcreator.events.EventDispatcher;
 import com.mygdx.hitboxcreator.events.ProjectSerializerEvent;
 
 public class ProjectSerializer {
 
-    @Inject EventDispatcher eventDispatcher;
+    EventDispatcher eventDispatcher;
 
 
     public ProjectModel loadProject(FileHandle file) {

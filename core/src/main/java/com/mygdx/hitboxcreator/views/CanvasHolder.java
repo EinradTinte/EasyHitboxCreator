@@ -9,19 +9,24 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
+import com.kotcrab.vis.ui.widget.MenuItem;
+import com.kotcrab.vis.ui.widget.PopupMenu;
 import com.mygdx.hitboxcreator.App;
-import com.mygdx.hitboxcreator.utils.ProjectModel;
 
 public class CanvasHolder extends WidgetGroup {
     private static final int[] ZOOM_LEVELS = {10, 16, 25, 33, 50, 66, 100, 150, 200, 300, 400, 600, 800, 1000};
     public static final int DEFAULT_ZOOM_INDEX = 6;
     private final float PADDING = 20;
 
-    private ScaleGroup2 group;
+    private ScaleGroup group;
 
     private Listener listener;
     private int zoomIndex = DEFAULT_ZOOM_INDEX;
+
+
 
 
 
@@ -31,8 +36,10 @@ public class CanvasHolder extends WidgetGroup {
 
 
         addListener(new PanZoomListener());
-        group = new ScaleGroup2();
+        group = new ScaleGroup();
         addActor(group);
+
+
     }
 
 
@@ -54,7 +61,7 @@ public class CanvasHolder extends WidgetGroup {
 
 
 
-    public ScaleGroup2 getScaleGroup() { return group; }
+    public ScaleGroup getScaleGroup() { return group; }
 
 
     public interface Listener {
@@ -68,6 +75,7 @@ public class CanvasHolder extends WidgetGroup {
         if (listener != null) {
             listener.onZoomChanged(ZOOM_LEVELS[zoomIndex]);
         }
+        group.redrawCircles();
     }
 
     private class PanZoomListener extends InputListener {
@@ -94,8 +102,8 @@ public class CanvasHolder extends WidgetGroup {
 
         @Override
         public void touchDragged(InputEvent event, float x, float y, int pointer) {
-            group.moveBy(x - lastPos.x, y - lastPos.y);
-            lastPos.set(x, y);
+                group.moveBy(x - lastPos.x, y - lastPos.y);
+                lastPos.set(x, y);
         }
 
         /** Zoom. Changes scaling and moves group so it zooms on cursor position. */

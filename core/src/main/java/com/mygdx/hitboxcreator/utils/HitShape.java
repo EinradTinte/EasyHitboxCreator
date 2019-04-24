@@ -52,14 +52,14 @@ public abstract class HitShape extends Actor {
     }
 
 
-    static void setColors(Color normalBody, Color selectedBody, Color normalBorder, Color selectedBorder) {
+    public static void setColors(Color normalBody, Color selectedBody, Color normalBorder, Color selectedBorder) {
         cBodyNormal = normalBody;
         cBodySelected = selectedBody;
         cBorderNormal = normalBorder;
         cBorderSelected = selectedBorder;
     }
 
-    static void setBorderWidth(float width) {
+    public static void setBorderWidth(float width) {
         borderWidth = width;
     }
 
@@ -94,13 +94,13 @@ public abstract class HitShape extends Actor {
         public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
             // workaround because exit gets also triggered when actor loses touchfocus
             // and that would cause to lose the highlighting when dragging ends
-            if (isFront() && contains(x, y)) {
-                mouseMoved(null, x, y);
-            } else {
+            //if (isFront() && contains(x, y)) {
+            //    mouseMoved(null, x, y);
+            //} else {
                 // sets color back to normal when mouse exits
                 selection = 0;
                 highlightBorder();
-            }
+            //}
         }
 
         @Override
@@ -119,7 +119,7 @@ public abstract class HitShape extends Actor {
      * Subclasses will also use this method to update their PolygonSprites.
      * In this case make sure to call super.somethingChanged() !
      */
-    void somethingChanged() {
+    public void somethingChanged() {
         eventDispatcher.postEvent(new HitShapesChangedEvent(HitShapesChangedEvent.Action.FORM_CHANGED));
     }
 

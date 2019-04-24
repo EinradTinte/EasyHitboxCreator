@@ -34,11 +34,14 @@ public class ScaleGroup extends Group {
 
     /** Circles calculate their segment count for smooth drawing according to their size and the groups
      * scale. They do this in their somethingChanged() method that gets internally called on resize.
-     * But they can't detect zooming change, so we have to manually call this method.*/
-    public void redrawCircles() {
+     * But they can't detect zooming change, so we have to manually call this method.
+     *
+     * Also no HitShape can detect when its borderWidth or colors get changed.
+     * */
+    public void redrawHitShapes() {
         for (Actor actor : getChildren()) {
-            if (actor instanceof HitCircle) {
-                ((HitCircle) actor).somethingChanged();
+            if (actor instanceof HitShape) {
+                ((HitShape) actor).somethingChanged();
             }
         }
     }

@@ -215,7 +215,11 @@ public class HitCircle extends HitShape {
     public void somethingChanged() {
         super.somethingChanged();
         spBody = prepareSprite(drawCircle(getX() + radius, getY() + radius, radius));
-        spBorder = prepareSprite(drawRing(getX() + radius, getY() + radius, radius, borderWidth));
+        if (borderWidth != 1) {
+            spBorder = prepareSprite(drawRing(getX() + radius, getY() + radius, radius, borderWidth));
+        } else {
+            spBorder = prepareSprite(drawRing(getX() + radius, getY() + radius, radius-0.5f, borderWidth));
+        }
     }
 
     private PolygonSprite prepareSprite(PolygonRegion polygonRegion) {

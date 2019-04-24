@@ -93,13 +93,7 @@ public class Editor extends Stack {
 
             // Buttons
                 {
-                    //TODO: skin atlas
-                VisImageButton.VisImageButtonStyle recStyle = new VisImageButton.VisImageButtonStyle();
-                recStyle.imageUp = new TextureRegionDrawable(new TextureRegion(new Texture("buttons/btnRectangle_Up.png")));
-                recStyle.imageDown = new TextureRegionDrawable(new TextureRegion(new Texture("buttons/btnRectangle_Down.png")));
-                recStyle.imageOver = new TextureRegionDrawable(new TextureRegion(new Texture("buttons/btnRectangle_Over.png")));
-
-                btnRectangle = new VisImageButton(recStyle);
+                btnRectangle = new VisImageButton("addRec");
                 String recTt = App.inst().getI18NBundle().format("tTaddRectangle");
                 btnRectangle.addListener(new TextTooltip(recTt, VisUI.getSkin()));
                 btnRectangle.addListener(new ChangeListener() {
@@ -111,14 +105,7 @@ public class Editor extends Stack {
                 });
 
 
-                // ADD CIRCLE BUTTON
-
-                VisImageButton.VisImageButtonStyle cirStyle = new VisImageButton.VisImageButtonStyle();
-                cirStyle.imageUp = new TextureRegionDrawable(new TextureRegion(new Texture("buttons/btnCircle_Up.png")));
-                cirStyle.imageDown = new TextureRegionDrawable(new TextureRegion(new Texture("buttons/btnCircle_Down.png")));
-                cirStyle.imageOver = new TextureRegionDrawable(new TextureRegion(new Texture("buttons/btnCircle_Over.png")));
-
-                btnCircle = new VisImageButton(cirStyle);
+                btnCircle = new VisImageButton("addCir");
                 String cirTt = App.inst().getI18NBundle().format("tTaddCircle");
                 btnCircle.addListener(new TextTooltip(cirTt, VisUI.getSkin()));
                 btnCircle.addListener(new ChangeListener() {

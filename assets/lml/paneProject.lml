@@ -8,7 +8,7 @@
         <label align="right" text="@projectImgPath" tooltip="@projectTtImgPath"/>
         <textfield id="edtImgPath" readonly="true" minwidth="24" growx="true"/>
         <:sidebutton id="btnImgPath" icon="custom/ic-folder-pick" onchange="pickImgPath" tooltip="@projectTtImgPath"/>
-        <:sidebutton id="btnClearImg" icon="custom/ic-file-delete" onchange="clearImg"/>
+        <:sidebutton id="btnClearImg" icon="custom/ic-trash-red" onchange="clearImg"/>
 
     </table>
 

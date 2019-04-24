@@ -4,7 +4,7 @@
 <vistable background="canvasInfoPanel" tablealign="right" padright="8" defaultalign="left">
 
 	<vistable tooltip="@canvasInfoTtRectangleCount">
-		<!--<visimage style="custom/ic-small-dimens" color="light-grey"/>-->
+		<visimage style="custom/ic-small-rectangle" color="light-grey"/>
 		<actor width="4"/>
 		<vislabel id="lblRecCount" style="small"/>
 	</vistable>
@@ -12,7 +12,7 @@
 	<actor width="12"/>
 
 	<vistable tooltip="@canvasInfoTtCircleCount">
-		<!--<visimage style="custom/ic-small-dimens" color="light-grey"/>-->
+		<visimage style="custom/ic-small-circle" color="light-grey"/>
 		<actor width="4"/>
 		<vislabel id="lblCirCount" style="small" />
 	</vistable>

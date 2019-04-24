@@ -18,10 +18,11 @@ import com.kotcrab.vis.ui.widget.MenuItem;
 import com.kotcrab.vis.ui.widget.PopupMenu;
 import com.mygdx.hitboxcreator.App;
 import com.mygdx.hitboxcreator.utils.GlobalActions;
+import com.mygdx.hitboxcreator.utils.HitShape;
 
 public class CanvasHolder extends WidgetGroup {
-    private static final int[] ZOOM_LEVELS = {10, 16, 25, 33, 50, 66, 100, 150, 200, 300, 400, 600, 800, 1000};
-    public static final int DEFAULT_ZOOM_INDEX = 6;
+    private static final int[] ZOOM_LEVELS = {25, 33, 50, 66, 100, 150, 200, 300, 400, 600, 800, 1000};
+    public static final int DEFAULT_ZOOM_INDEX = 4;
     private final float PADDING = 20;
 
     private ScaleGroup group;
@@ -77,12 +78,17 @@ public class CanvasHolder extends WidgetGroup {
 
     public void setZoomIndex(int zoomIndex) {
         this.zoomIndex = zoomIndex;
-        group.setScale(ZOOM_LEVELS[zoomIndex] / 100f);
+        float zoom = ZOOM_LEVELS[zoomIndex] / 100f;
+        group.setScale(zoom);
 
         if (listener != null) {
             listener.onZoomChanged(ZOOM_LEVELS[zoomIndex]);
         }
-        group.redrawCircles();
+
+        // changing border width according to zoom level
+        HitShape.setBorderWidth(Math.max(1, 2 / zoom));
+
+        group.redrawHitShapes();
     }
 
     private class PanZoomListener extends InputListener {

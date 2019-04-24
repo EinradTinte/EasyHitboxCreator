@@ -52,7 +52,7 @@ public class App extends LmlApplicationListener {
 
     private TextureRegion region;
 
-    private BitmapFont font;
+
     private Cursor cMove, cResize_ne, cResize_nw;
 
 
@@ -99,12 +99,11 @@ public class App extends LmlApplicationListener {
 
 
 
-        font = new BitmapFont();
-        font.setColor(Color.MAGENTA);
+
         // Loading custom Cursors
-        cMove = Gdx.graphics.newCursor(new Pixmap(Gdx.files.internal("cursor/move.png")), 17, 17);
-        cResize_ne = Gdx.graphics.newCursor(new Pixmap(Gdx.files.internal("cursor/resize-ne.png")), 9, 9);
-        cResize_nw = Gdx.graphics.newCursor(new Pixmap(Gdx.files.internal("cursor/resize-nw.png")), 9, 9);
+        cMove = Gdx.graphics.newCursor(new Pixmap(Gdx.files.internal("cursor/cursor-move.png")), 17, 17);
+        cResize_ne = Gdx.graphics.newCursor(new Pixmap(Gdx.files.internal("cursor/cursor-resize-ne.png")), 9, 9);
+        cResize_nw = Gdx.graphics.newCursor(new Pixmap(Gdx.files.internal("cursor/cursor-resize-nw.png")), 9, 9);
 
 
         init();
@@ -186,8 +185,8 @@ public class App extends LmlApplicationListener {
         skin.add("small-font", fontSmall, BitmapFont.class);
         skin.add("big-font", fontBig, BitmapFont.class);
 
-        skin.addRegions(new TextureAtlas(Gdx.files.internal("skin/uiskin.atlas")));
-        skin.load(Gdx.files.internal("skin/uiskin.json"));
+        skin.addRegions(new TextureAtlas(Gdx.files.internal("skin/myuiskin.atlas")));
+        skin.load(Gdx.files.internal("skin/myuiskin.json"));
         VisUI.load(skin);
     }
 

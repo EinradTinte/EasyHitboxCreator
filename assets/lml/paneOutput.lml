@@ -8,8 +8,8 @@
         <vistable growx="true" tablealign="left" background="button">
 
 
-            <:sidebutton id="btnOutputSelectAll" icon="custom/ic-input-file-properties" onchange="outputSelectAll" tooltip="@tToutputSelectAll"/>
-            <:sidebutton id="btnOutputSettings" icon="custom/ic-process" onchange="outputSettings" tooltip="@tTsettingsOutput"/>
+            <:sidebutton id="btnOutputSelectAll" icon="custom/ic-clipboard" onchange="outputSelectAll" tooltip="@tToutputSelectAll"/>
+            <:sidebutton id="btnOutputSettings" icon="custom/ic-settings" onchange="outputSettings" tooltip="@tTsettingsOutput"/>
         </vistable>
 
         <vistable grow="true" pad="4">

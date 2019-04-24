@@ -166,13 +166,22 @@ public class HitRectangle extends HitShape {
     }
 
     @Override
-    void somethingChanged() {
+    public void somethingChanged() {
 
         spBody = prepareSprite(drawRect(getX(), getY(), getWidth(), getHeight()), triangles);
-        spLeft = prepareSprite(drawRectLine(getX(), getY(), getX(), getTop(), borderWidth), triangles);
-        spTop = prepareSprite(drawRectLine(getX(), getTop(), getRight(), getTop(), borderWidth), triangles);
-        spRight = prepareSprite(drawRectLine(getRight(), getTop(), getRight(), getY(), borderWidth), triangles);
-        spBottom = prepareSprite(drawRectLine(getX(), getY(), getRight(), getY(), borderWidth), triangles);
+        if (borderWidth != 1) {
+            spLeft = prepareSprite(drawRectLine(getX(), getY(), getX(), getTop(), borderWidth), triangles);
+            spTop = prepareSprite(drawRectLine(getX(), getTop(), getRight(), getTop(), borderWidth), triangles);
+            spRight = prepareSprite(drawRectLine(getRight(), getTop(), getRight(), getY(), borderWidth), triangles);
+            spBottom = prepareSprite(drawRectLine(getX(), getY(), getRight(), getY(), borderWidth), triangles);
+        } else {
+            // when borderwidth = 1 the border should lay exactly on the edges. But by how the border meshes are created
+            // we have to adjust the input values
+            spLeft = prepareSprite(drawRectLine(getX()+0.5f, getY(), getX()+0.5f, getTop(), borderWidth), triangles);
+            spTop = prepareSprite(drawRectLine(getX(), getTop()-0.5f, getRight(), getTop()-0.5f, borderWidth), triangles);
+            spRight = prepareSprite(drawRectLine(getRight()-0.5f, getTop(), getRight()-0.5f, getY(), borderWidth), triangles);
+            spBottom = prepareSprite(drawRectLine(getX(), getY()+0.5f, getRight(), getY()+0.5f, borderWidth), triangles);
+        }
         super.somethingChanged();
     }
 
@@ -207,15 +216,15 @@ public class HitRectangle extends HitShape {
     /** Draws a rotated rectangle, where one edge is centered at x1, y1 and the opposite edge centered at x2, y2. */
     private float[] drawRectLine(float x1, float y1, float x2, float y2, float width) {
         float[] vertices = new float[4*HitShape.NUM_COMPONENTS];
-        width *= 0.5f;
-        Vector2 t = tmpV.set(y2 - y1, x1 - x2).nor();
-        float tx = t.x * width;
-        float ty = t.y * width;
-        setVertex(vertices, 0, x1 + tx, y1 + ty);
-        setVertex(vertices, 1, x1 - tx, y1 - ty);
-        setVertex(vertices, 2, x2 - tx, y2 - ty);
-        setVertex(vertices, 3, x2 + tx, y2 + ty);
-        return vertices;
+            width *= 0.5f;
+            Vector2 t = tmpV.set(y2 - y1, x1 - x2).nor();
+            float tx = t.x * width;
+            float ty = t.y * width;
+            setVertex(vertices, 0, x1 + tx, y1 + ty);
+            setVertex(vertices, 1, x1 - tx, y1 - ty);
+            setVertex(vertices, 2, x2 - tx, y2 - ty);
+            setVertex(vertices, 3, x2 + tx, y2 + ty);
+            return vertices;
     }
 
     private float[] drawRect(float x, float y, float width, float height) {

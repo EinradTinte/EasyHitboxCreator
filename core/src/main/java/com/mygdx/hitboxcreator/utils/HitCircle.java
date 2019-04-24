@@ -92,21 +92,23 @@ public class HitCircle extends HitShape {
                 float dy = y - lastPos.y;
                 // when the object moves we have to take this into account for next dx/dy
                 float mx = 0, my = 0;
+                // we only want to move in whole pixels not in fractions
+                float dxp = Math.round(dx), dyp = Math.round(dy);
 
                 if ((selection & Selection.move) != 0) {
-                    moveBy(dx, dy);
-                    mx = dx;
-                    my = dy;
+                    moveBy(dxp, dyp);
+                    mx = dxp;
+                    my = dyp;
                 }
                 if (selection == Selection.border) {
-                    float q = (float)Math.sqrt((x-radius)*(x-radius)+(y-radius)*(y-radius));
+                    float r = Math.round(Math.sqrt((x-radius)*(x-radius)+(y-radius)*(y-radius)));
                     float oldRadius = radius;
-                    if (q >= minRadius) {
-                        radius = q;
+                    if (r >= minRadius) {
+                        radius = r;
                         setSize(radius * 2, radius * 2);
                         setPosition(getX() + oldRadius, getY() + oldRadius, Align.center);
-                        mx -= q - oldRadius;
-                        my -= q - oldRadius;
+                        mx -= r - oldRadius;
+                        my -= r - oldRadius;
                     }
                     /*
                     // TODO: diagonal resize sets border always on mouse pointer, even if you grabbed slightly beside
@@ -152,7 +154,7 @@ public class HitCircle extends HitShape {
                 }
 
                 somethingChanged();
-                lastPos.set(x-mx, y-my);
+                lastPos.set(x-mx-(dx-dxp), y-my-(dy-dyp));
             }
         });
         //endregion

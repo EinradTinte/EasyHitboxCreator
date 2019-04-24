@@ -82,32 +82,34 @@ public class HitRectangle extends HitShape {
                 float dy = y - lastPos.y;
                 // when the object moves we have to take this into account for next dx/dy
                 float mx = 0, my = 0;
+                // we only want to move in whole pixels not in fractions
+                float dxp = Math.round(dx), dyp = Math.round(dy);
 
                 if ((selection & Selection.move) != 0) {
-                    moveBy(dx, dy);
-                    mx = dx;
-                    my = dy;
+                    moveBy(dxp, dyp);
+                    mx = dxp;
+                    my = dyp;
                 }
-                if ((selection & Selection.left) != 0 && getWidth() - dx >= 2) {
-                    moveBy(dx, 0);
-                    setWidth(getWidth() - dx);
-                    mx = dx;
+                if ((selection & Selection.left) != 0 && getWidth() - dxp >= 2) {
+                    moveBy(dxp, 0);
+                    setWidth(getWidth() - dxp);
+                    mx = dxp;
                 }
-                if ((selection & Selection.right) != 0 && getWidth() + dx >= 2) {
-                    setWidth(getWidth() + dx);
+                if ((selection & Selection.right) != 0 && getWidth() + dxp >= 2) {
+                    setWidth(getWidth() + dxp);
                 }
-                if ((selection & Selection.top) != 0 && getHeight() + dy >= 2) {
-                    setHeight(getHeight() + dy);
+                if ((selection & Selection.top) != 0 && getHeight() + dyp >= 2) {
+                    setHeight(getHeight() + dyp);
                 }
-                if ((selection & Selection.bottom) != 0 && getHeight() - dy >= 2) {
-                    moveBy(0, dy);
-                    setHeight(getHeight() - dy);
-                    my = dy;
+                if ((selection & Selection.bottom) != 0 && getHeight() - dyp >= 2) {
+                    moveBy(0, dyp);
+                    setHeight(getHeight() - dyp);
+                    my = dyp;
                 }
 
 
                 somethingChanged();
-                lastPos.set(x-mx, y-my);
+                lastPos.set(x-mx-(dx-dxp), y-my-(dy-dyp));
             }
         });
         //endregion

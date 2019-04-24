@@ -47,7 +47,7 @@ public class HitCircle extends HitShape {
         setRegion();
 
         highlightBorder();
-        drawBorder = true;
+
 
         addPopupMenu();
 
@@ -168,7 +168,7 @@ public class HitCircle extends HitShape {
 
     @Override
     void highlightBorder() {
-        cBody = selection != 0 ? cBodySelected : cBodyNormal;
+        cBody = isSelected ? cSelected : selection != 0 ? cBodySelected : cBodyNormal;
         cBorder = ((selection & Selection.border) != 0) ? cBorderSelected : cBorderNormal;
 
         switch (selection) {
@@ -291,7 +291,7 @@ public class HitCircle extends HitShape {
 
     /** Estimating the number of segments needed for a smooth circle */
     private int calculateSegmentCount(float radius) {
-        if (getParent() == null) return 20;
+        if (getParent() == null) return 40;
         else return (int)(8 * (float)Math.cbrt(radius * getParent().getScaleX()));
     }
 

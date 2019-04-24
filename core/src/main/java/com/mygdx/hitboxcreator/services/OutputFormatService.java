@@ -59,11 +59,15 @@ public class OutputFormatService {
 
         outputFormats.add(format);
         buildFormatNames();
+        saveFormats();
     }
 
     public void remove(OutputFormat format) {
+        if (selectedFormat.equals(format.getName()))
+            selectedFormat = formatNames.get(formatNames.indexOf(selectedFormat)-1);
         outputFormats.remove(format);
         buildFormatNames();
+        saveFormats();
     }
 
     public void remove(String name) {

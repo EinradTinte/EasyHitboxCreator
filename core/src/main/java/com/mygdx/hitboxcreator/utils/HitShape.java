@@ -1,5 +1,6 @@
 package com.mygdx.hitboxcreator.utils;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -8,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.kotcrab.vis.ui.widget.MenuItem;
@@ -24,10 +26,14 @@ public abstract class HitShape extends Actor {
     static Color cBodySelected = new Color(1,0.2F,0,0.5F);
     static Color cBorderNormal = new Color(0,0,0,0.5F);
     static Color cBorderSelected = new Color(0,0,1,1);
-    boolean drawBorder;
+    static Color cSelected = new Color(0, 0, 1, 0.7F);
+
+    boolean drawBorder = true;
     float grabArea = 6;
     static float borderWidth = 2;
     int selection;
+    boolean isSelected;
+    int selectionSave;
 
     TextureRegion region;
     EventDispatcher eventDispatcher = App.inst().getEventDispatcher();
@@ -37,7 +43,20 @@ public abstract class HitShape extends Actor {
 
 
     void addPopupMenu() {
-        PopupMenu popupMenu = new PopupMenu();
+        PopupMenu popupMenu = new PopupMenu() {
+            @Override
+            public boolean remove() {
+                isSelected = false;
+                highlightBorder();
+                return super.remove();
+            }
+
+            @Override
+            public void showMenu(Stage stage, float x, float y) {
+                isSelected = true;
+                super.showMenu(stage, x, y);
+            }
+        };
         //String text = App.inst().getI18NBundle().format("menuItemCanvas");
         MenuItem menuItem = new MenuItem("Delete");
         menuItem.addListener(new ChangeListener() {
@@ -71,11 +90,7 @@ public abstract class HitShape extends Actor {
         return contains(x, y) ? this : null;
     }
 
-    boolean isFront() {
-        Group parent = this.getParent();
-        if (parent == null) return false;
-        return parent.getChildren().size == getZIndex()+1;
-    }
+
 
     abstract boolean contains(float x, float y);
 
@@ -91,22 +106,34 @@ public abstract class HitShape extends Actor {
         final Vector2 lastPos = new Vector2();
 
         @Override
+        public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+            // if the hitshape loses focus while dragging (cursor outside of editor or over button)
+            // the selection will be saved and restored when the cursor enters back on
+            selection = selectionSave;
+            highlightBorder();
+        }
+
+        @Override
+        public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+            selectionSave = 0;
+        }
+
+        @Override
         public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
-            // workaround because exit gets also triggered when actor loses touchfocus
-            // and that would cause to lose the highlighting when dragging ends
-            //if (isFront() && contains(x, y)) {
-            //    mouseMoved(null, x, y);
-            //} else {
-                // sets color back to normal when mouse exits
+            // pointer == -1: hover event   |   pointer != -1: click event
+            if (pointer == -1) {
                 selection = 0;
                 highlightBorder();
-            //}
+            } else {
+                mouseMoved(null, x, y);
+            }
         }
 
         @Override
         public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-            if (button != Input.Buttons.LEFT) return false;
+            if (button != Input.Buttons.LEFT && button != Input.Buttons.RIGHT) return false;
 
+            selectionSave = selection;
             toFront();
             lastPos.set(x, y);
             return true;

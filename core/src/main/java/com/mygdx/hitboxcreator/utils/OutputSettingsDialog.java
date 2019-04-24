@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.I18NBundle;
 import com.badlogic.gdx.utils.ObjectMap;
+import com.badlogic.gdx.utils.Timer;
 import com.github.czyzby.lml.annotation.LmlAction;
 import com.github.czyzby.lml.annotation.LmlActor;
 import com.github.czyzby.lml.annotation.LmlAfter;
@@ -46,8 +47,7 @@ public class OutputSettingsDialog extends VisDialog implements ActionContainer {
     @LmlActor("slboxFormat") private SelectBox slboxFormat;
     @LmlActor("htaMarkupRectangle") private HighlightTextArea htaMarkupRectangle;
     @LmlActor("htaMarkupCircle") private HighlightTextArea htaMarkupCircle;
-    @LmlActor("btnOutputFormatNew") private VisImageButton btnOutputFormatNew;
-    @LmlActor("btnOutputFormatCopy") private VisImageButton btnOutputFormatCopy;
+    @LmlActor("btnOutputFormatRename") private VisImageButton btnOutputFormatRename;
     @LmlActor("btnOutputFormatDel") private VisImageButton btnOutputFormatDel;
     @LmlActor("taMarkupPreview") private VisLabel taMarkupPreview;
 
@@ -79,8 +79,7 @@ public class OutputSettingsDialog extends VisDialog implements ActionContainer {
         slboxFormat = (SelectBox) map.get("slboxFormat");
         htaMarkupRectangle = (HighlightTextArea) map.get("htaMarkupRectangle");
         htaMarkupCircle = (HighlightTextArea) map.get("htaMarkupCircle");
-        btnOutputFormatNew = (VisImageButton) map.get("btnOutputFormatNew");
-        btnOutputFormatCopy = (VisImageButton) map.get("btnOutputFormatCopy");
+        btnOutputFormatRename = (VisImageButton) map.get("btnOutputFormatRename");
         btnOutputFormatDel = (VisImageButton) map.get("btnOutputFormatDel");
         taMarkupPreview = (VisLabel) map.get("taMarkupPreview");
     }
@@ -92,7 +91,7 @@ public class OutputSettingsDialog extends VisDialog implements ActionContainer {
         outputBuilder = new OutputBuilder(formatService.getOutputFormat(0));
         htaMarkupRectangle.setHighlighter(buildSyntaxHighlighter(Color.CYAN, HitRectangle.attributes));
         htaMarkupCircle.setHighlighter(buildSyntaxHighlighter(Color.CYAN, HitCircle.attributes));
-        updateSlboxItems();
+        updateSlboxItems(formatService.getSelectedIndex());
         setFormatTexts();
     }
 
@@ -117,18 +116,29 @@ public class OutputSettingsDialog extends VisDialog implements ActionContainer {
      * Useful when last dialog got closed without setting a new format. */
     @Override
     public VisDialog show(Stage stage) {
-        slboxFormat.setSelectedIndex(formatService.getSelectedIndex());
+        // hack to circumvent vistextareas string visibilty bug. Normally the setFormatTexts() method
+        // takes care of this but for some reason calling it before super.show() has no effect or gets reverted.
+        // So we have to do this in a Timer.Task. DelayTime can be set to 0.
+        // Fucking weird behavior. That cost me so much time.
+        Timer.schedule(new Timer.Task() {
+            @Override
+            public void run() {
+                slboxFormat.setSelectedIndex(formatService.getSelectedIndex());
+                // if selection is the same as before, setFormatTexts() will not be automatically called so we do it
+                setFormatTexts();
+            }
+        },0);
+
         return super.show(stage);
     }
 
     @LmlAction("outputSettingsFormatNew") void outputSettingsFormatNew() {
-        Dialogs.showInputDialog(stage, strings.format("dlgTitleNewFormat"), strings.format("dlgTextNewFormat"), true, new NameExistsValidator(), new InputDialogListener() {
+        Dialogs.showInputDialog(stage, strings.format("dlgTextChooseName"), null, false, new NameExistsValidator(), new InputDialogListener() {
             @Override
             public void finished(String s) {
                 OutputFormat format = new OutputFormat(s, true);
                 formatService.add(format);
-                updateSlboxItems();
-                slboxFormat.setSelectedIndex(slboxFormat.getMaxListCount()+1);
+                updateSlboxItems(slboxFormat.getItems().size);
             }
 
             @Override
@@ -136,14 +146,42 @@ public class OutputSettingsDialog extends VisDialog implements ActionContainer {
 
             }
         });
-
     }
 
-    @LmlAction("outputSettingsFormatCopy") void outputSettingsFormatCopy() {
-        OutputFormat format = new OutputFormat("platzhalter", formatService.getOutputFormat((String) slboxFormat.getSelected()));
-        formatService.add(format);
-        updateSlboxItems();
 
+    @LmlAction("outputSettingsFormatCopy") void outputSettingsFormatCopy() {
+
+        Dialogs.showInputDialog(stage, strings.format("dlgTextChooseName"), null, false, new NameExistsValidator(), new InputDialogListener() {
+            @Override
+            public void finished(String s) {
+                OutputFormat format = new OutputFormat(s, formatService.getOutputFormat((String) slboxFormat.getSelected()));
+                formatService.add(format);
+                updateSlboxItems(slboxFormat.getItems().size);
+            }
+
+            @Override
+            public void canceled() {
+
+            }
+        }).setText(String.format("%s %s", outputFormat.getName(), strings.format("dlgTextCopy")), true);
+    }
+
+
+    @LmlAction("outputSettingsFormatRename") void changeFormatName() {
+        Dialogs.showInputDialog(stage, strings.format("dlgTextChooseName"), null, false, new NameExistsValidator(), new InputDialogListener() {
+            @Override
+            public void finished(String s) {
+                formatService.getOutputFormat(slboxFormat.getSelectedIndex()).setName(s);
+                formatService.buildFormatNames();
+                saveFormats();
+                updateSlboxItems(slboxFormat.getSelectedIndex());
+            }
+
+            @Override
+            public void canceled() {
+
+            }
+        }).setText(outputFormat.getName(), true);
     }
 
 
@@ -152,7 +190,7 @@ public class OutputSettingsDialog extends VisDialog implements ActionContainer {
             @Override
             public void yes() {
                 formatService.remove((String) slboxFormat.getSelected());
-                updateSlboxItems();
+                updateSlboxItems(slboxFormat.getSelectedIndex()-1);
             }
 
             @Override
@@ -167,24 +205,6 @@ public class OutputSettingsDialog extends VisDialog implements ActionContainer {
         });
     }
 
-
-
-    @LmlAction("changeFormatName") void changeFormatName() {
-        Dialogs.InputDialog dialog = Dialogs.showInputDialog(stage, strings.format("dlgTitleNewFormat"), strings.format("dlgTextNewFormat"), true, new NameExistsValidator(), new InputDialogListener() {
-            @Override
-            public void finished(String s) {
-                formatService.getOutputFormat(slboxFormat.getSelectedIndex()).setName("replace this");
-                formatService.buildFormatNames();
-                updateSlboxItems();
-            }
-
-            @Override
-            public void canceled() {
-
-            }
-        });
-        dialog.setText(outputFormat.getName(), true);
-    }
 
 
     /** Updates format on change. */
@@ -223,15 +243,20 @@ public class OutputSettingsDialog extends VisDialog implements ActionContainer {
 
         outputBuilder.setOutputFormat(format);
         // hack to fix text not fully shown when to wide
+
+
         stage.draw();
+
         htaMarkupRectangle.setText(format.getMarkup(OutputFormat.Type.RECTANGLE));
         htaMarkupCircle.setText(format.getMarkup(OutputFormat.Type.CIRCLE));
+
 
 
         setTextPreview();
 
         htaMarkupRectangle.setReadOnly(!format.isDeletable());
         htaMarkupCircle.setReadOnly(!format.isDeletable());
+        btnOutputFormatRename.setDisabled(!format.isDeletable());
         btnOutputFormatDel.setDisabled(!format.isDeletable());
     }
 
@@ -244,8 +269,9 @@ public class OutputSettingsDialog extends VisDialog implements ActionContainer {
     }
 
     /** Setup SelectBox Items. */
-    private void updateSlboxItems() {
+    private void updateSlboxItems(int selectedIndex) {
         slboxFormat.setItems(formatService.getFormatNames().toArray());
+        slboxFormat.setSelectedIndex(selectedIndex);
     }
 
 

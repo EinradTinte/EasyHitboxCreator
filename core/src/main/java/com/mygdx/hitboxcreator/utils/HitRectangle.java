@@ -46,7 +46,7 @@ public class HitRectangle extends HitShape {
         addPopupMenu();
 
         highlightBorder();
-        drawBorder = true;
+
 
 
         // actually at this point parent is not yet set so we have to look for this in the calculateSegmentCount() method
@@ -134,7 +134,8 @@ public class HitRectangle extends HitShape {
         cBottom = ((selection & Selection.bottom) != 0) ? cBorderSelected : cBorderNormal;
         cTop = ((selection & Selection.top) != 0) ? cBorderSelected : cBorderNormal;
 
-        cBody = selection != 0 ? cBodySelected : cBodyNormal;
+
+        cBody = isSelected ? cSelected : selection != 0 ? cBodySelected : cBodyNormal;
 
         switch (selection) {
             case Selection.move:

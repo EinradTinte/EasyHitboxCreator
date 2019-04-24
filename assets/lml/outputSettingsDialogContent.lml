@@ -7,20 +7,21 @@
         <selectbox id="slboxFormat" width="150" selected="0" onchange="setFormatTexts"/>
         <:sidebutton id="btnOutputFormatNew" icon="custom/ic-file-new" onchange="outputSettingsFormatNew" tooltip="@outputSettingsTtFormatNew"/>
         <:sidebutton id="btnOutputFormatCopy" icon="custom/ic-file-copy" onchange="outputSettingsFormatCopy" tooltip="@outputSettingsTtFormatCopy"/>
+        <:sidebutton id="btnOutputFormatRename" icon="custom/ic-file-edit" onchange="outputSettingsFormatRename" tooltip="@outputSettingsTtFormatRename"/>
         <:sidebutton id="btnOutputFormatDel" icon="custom/ic-file-delete" onchange="outputSettingsFormatDel" tooltip="@outputSettingsTtFormatDel"/>
     </horizontalgroup>
 
     <:row padtop="4"/>
 
     <container width="700" height="300">
-        <vissplitpane min="0.5" max="0.8" value="0.6">
+        <vissplitpane min="0.5" max="0.9" value="0.6">
             <visscrollpane disabledx="true" flickscroll="false" overscroll="false" fadescrollbars="false" style="minimal" oncreate="getScrollOnHover">
                 <vistable onecolumn="true" padright="4" align="top">
                     <vistable growx="true" tooltip="@outputSettingTtMarkupRectangle" height="100" tablealign="top">
                         <vislabel text="@outputSettingsMarkupRectangle" align="left" color="orange"/>
                         <:row padtop="4"/>
-                        <scrollpane flickscroll="false" fadescrollbars="false" grow="true" barsontop="true" style="text-output">
-                            <highlighttextarea id="htaMarkupRectangle" onchange="onhtaMarkupChange"/>
+                        <scrollpane flickscroll="false" fadescrollbars="false" grow="true" barsontop="true">
+                            <highlighttextarea id="htaMarkupRectangle" onchange="onhtaMarkupChange" message="@msgFormatInfo" style="seekbar"/>
                         </scrollpane>
                     </vistable>
 
@@ -29,8 +30,8 @@
                     <vistable growx="true" tablealign="top" height="100" tooltip="@outputSettingTtMarkupRectangle">
                         <vislabel text="@outputSettingsMarkupCircle" align="left" color="orange"/>
                         <:row padtop="4"/>
-                        <scrollpane flickscroll="false" fadescrollbars="false" grow="true" style="text-output">
-                            <highlighttextarea id="htaMarkupCircle" onchange="onhtaMarkupChange"/>
+                        <scrollpane flickscroll="false" fadescrollbars="false" grow="true" >
+                            <highlighttextarea id="htaMarkupCircle" onchange="onhtaMarkupChange" message="@msgFormatInfo" style="seekbar"/>
                         </scrollpane>
                     </vistable>
                     <!--

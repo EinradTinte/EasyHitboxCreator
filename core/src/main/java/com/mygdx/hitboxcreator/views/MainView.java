@@ -171,12 +171,7 @@ public class MainView extends AbstractLmlView {
         //outputSettingsDialog = (VisDialog) App.inst().getParser().parseTemplate(Gdx.files.internal("lml/outputSettingsDialog.lml")).first();
 
 
-        /*
-        outputSettingsDialog = (VisDialog) App.inst().getParser().parseTemplate(Gdx.files.internal("lml/outputSettingsDialog.lml")).first();
-        htaMarkupRectangle = outputSettingsDialog.findActor("htaMarkupRectangle");
-        htaMarkupRectangle.setHighlighter(buildSyntaxHighlighter(Color.CYAN, HitRectangle.attributes));
-        htaMarkupRectangle.setText(outputBuilder.getOutputFormat().getMarkup(OutputFormat.Type.RECTANGLE));
-        */
+
     }
 
 

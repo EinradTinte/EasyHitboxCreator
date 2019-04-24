@@ -8,15 +8,13 @@
         <vistable growx="true" tablealign="left" background="button">
 
 
-            <:sidebutton id="btnOutputSelectAll" icon="custom/ic-input-file-properties" onchange="outputSelectAll" tooltip="outputSelectAll"/>
-            <:sidebutton id="btnOutputSettings" icon="custom/ic-process" onchange="outputSettings" tooltip="settingsOutput"/>
+            <:sidebutton id="btnOutputSelectAll" icon="custom/ic-input-file-properties" onchange="outputSelectAll" tooltip="@tToutputSelectAll"/>
+            <:sidebutton id="btnOutputSettings" icon="custom/ic-process" onchange="outputSettings" tooltip="@tTsettingsOutput"/>
         </vistable>
 
         <vistable grow="true" pad="4">
-            <scrollpane overscroll="false" flick="false" barsontop="true" fadebars="false"  grow="true" >
-                <scrollabletextarea id="outputTextArea" readonly="true" style="small" focusborder="false">
-
-                </scrollabletextarea>
+            <scrollpane overscroll="false" flick="false" barsontop="true" fadebars="false"  grow="true" oncreate="getScrollOnHover">
+                <highlighttextarea id="outputTextArea" readonly="true" style="small" focusborder="false" />
             </scrollpane>
         </vistable>
 

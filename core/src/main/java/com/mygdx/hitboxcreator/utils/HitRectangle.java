@@ -167,12 +167,13 @@ public class HitRectangle extends HitShape {
 
     @Override
     void somethingChanged() {
-        super.somethingChanged();
+
         spBody = prepareSprite(drawRect(getX(), getY(), getWidth(), getHeight()), triangles);
         spLeft = prepareSprite(drawRectLine(getX(), getY(), getX(), getTop(), borderWidth), triangles);
         spTop = prepareSprite(drawRectLine(getX(), getTop(), getRight(), getTop(), borderWidth), triangles);
         spRight = prepareSprite(drawRectLine(getRight(), getTop(), getRight(), getY(), borderWidth), triangles);
         spBottom = prepareSprite(drawRectLine(getX(), getY(), getRight(), getY(), borderWidth), triangles);
+        super.somethingChanged();
     }
 
     @Override

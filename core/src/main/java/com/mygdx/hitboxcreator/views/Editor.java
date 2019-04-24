@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Stack;
+import com.badlogic.gdx.scenes.scene2d.ui.TextTooltip;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -23,6 +24,7 @@ import com.github.czyzby.lml.parser.impl.tag.AbstractNonParentalActorLmlTag;
 import com.github.czyzby.lml.parser.tag.LmlActorBuilder;
 import com.github.czyzby.lml.parser.tag.LmlTag;
 import com.github.czyzby.lml.parser.tag.LmlTagProvider;
+import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.MenuItem;
 import com.kotcrab.vis.ui.widget.PopupMenu;
 import com.kotcrab.vis.ui.widget.VisImageButton;
@@ -35,9 +37,9 @@ import com.mygdx.hitboxcreator.utils.ProjectModel;
 
 public class Editor extends Stack {
 
-    private  InfoPanel infoPanel;
-    private  CanvasHolder canvasHolder;
-    private  Image imgBackground;
+    private InfoPanel infoPanel;
+    private CanvasHolder canvasHolder;
+    private Image imgBackground;
     private VisImageButton btnRectangle, btnCircle;
     private ScaleGroup group;
 
@@ -49,6 +51,8 @@ public class Editor extends Stack {
     private PopupMenu popupMenu;
 
     public Editor(Skin skin) {
+
+        // Editor popupMenu to center its content
         popupMenu = new PopupMenu();
         String text = App.inst().getI18NBundle().format("menuItemCanvas");
         MenuItem menuItem = new MenuItem(text);
@@ -96,6 +100,8 @@ public class Editor extends Stack {
                 recStyle.imageOver = new TextureRegionDrawable(new TextureRegion(new Texture("buttons/btnRectangle_Over.png")));
 
                 btnRectangle = new VisImageButton(recStyle);
+                String recTt = App.inst().getI18NBundle().format("tTaddRectangle");
+                btnRectangle.addListener(new TextTooltip(recTt, VisUI.getSkin()));
                 btnRectangle.addListener(new ChangeListener() {
                     @Override
                     public void changed(ChangeEvent changeEvent, Actor actor) {
@@ -104,13 +110,17 @@ public class Editor extends Stack {
                     }
                 });
 
-                    VisImageButton.VisImageButtonStyle cirStyle = new VisImageButton.VisImageButtonStyle();
-                    cirStyle.imageUp = new TextureRegionDrawable(new TextureRegion(new Texture("buttons/btnCircle_Up.png")));
-                    cirStyle.imageDown = new TextureRegionDrawable(new TextureRegion(new Texture("buttons/btnCircle_Down.png")));
-                    cirStyle.imageOver = new TextureRegionDrawable(new TextureRegion(new Texture("buttons/btnCircle_Over.png")));
 
+                // ADD CIRCLE BUTTON
 
-                    btnCircle = new VisImageButton(cirStyle);
+                VisImageButton.VisImageButtonStyle cirStyle = new VisImageButton.VisImageButtonStyle();
+                cirStyle.imageUp = new TextureRegionDrawable(new TextureRegion(new Texture("buttons/btnCircle_Up.png")));
+                cirStyle.imageDown = new TextureRegionDrawable(new TextureRegion(new Texture("buttons/btnCircle_Down.png")));
+                cirStyle.imageOver = new TextureRegionDrawable(new TextureRegion(new Texture("buttons/btnCircle_Over.png")));
+
+                btnCircle = new VisImageButton(cirStyle);
+                String cirTt = App.inst().getI18NBundle().format("tTaddCircle");
+                btnCircle.addListener(new TextTooltip(cirTt, VisUI.getSkin()));
                 btnCircle.addListener(new ChangeListener() {
                     @Override
                     public void changed(ChangeEvent changeEvent, Actor actor) {
@@ -132,7 +142,7 @@ public class Editor extends Stack {
                 add(container);
             }
 
-            // Info pane
+            // Info panel
             {
                 infoPanel = new InfoPanel(App.inst().getParser());
                 addActor(infoPanel);
@@ -141,7 +151,6 @@ public class Editor extends Stack {
     }
 
     private Vector2 convertToScaleGroupPos(float x, float y) {
-        float dx = group.getX();
         return new Vector2((x - group.getX())/group.getScaleX(), (y - group.getY())/group.getScaleY());
     }
 

@@ -3,10 +3,12 @@ package com.mygdx.hitboxcreator.views;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Cursor;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
@@ -15,6 +17,7 @@ import com.badlogic.gdx.utils.Align;
 import com.kotcrab.vis.ui.widget.MenuItem;
 import com.kotcrab.vis.ui.widget.PopupMenu;
 import com.mygdx.hitboxcreator.App;
+import com.mygdx.hitboxcreator.utils.GlobalActions;
 
 public class CanvasHolder extends WidgetGroup {
     private static final int[] ZOOM_LEVELS = {10, 16, 25, 33, 50, 66, 100, 150, 200, 300, 400, 600, 800, 1000};
@@ -26,7 +29,7 @@ public class CanvasHolder extends WidgetGroup {
     private Listener listener;
     private int zoomIndex = DEFAULT_ZOOM_INDEX;
 
-
+    Rectangle tmpRectangle = new Rectangle();
 
 
 
@@ -36,6 +39,7 @@ public class CanvasHolder extends WidgetGroup {
 
 
         addListener(new PanZoomListener());
+        GlobalActions.getScrollOnHover(this);
         group = new ScaleGroup();
         addActor(group);
 
@@ -43,8 +47,11 @@ public class CanvasHolder extends WidgetGroup {
     }
 
 
-
-
+    @Override
+    public Actor hit(float x, float y, boolean touchable) {
+        if (!tmpRectangle.set(getX(), getY(), getWidth(), getHeight()).contains(x, y)) return null;
+        return super.hit(x, y, touchable);
+    }
 
     public void setListener(Listener listener) {
         this.listener = listener;
@@ -80,11 +87,6 @@ public class CanvasHolder extends WidgetGroup {
 
     private class PanZoomListener extends InputListener {
         private final Vector2 lastPos = new Vector2();
-
-        @Override
-        public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-            getStage().setScrollFocus(CanvasHolder.this);
-        }
 
         @Override
         public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {

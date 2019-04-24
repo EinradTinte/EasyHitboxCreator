@@ -6,9 +6,11 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Array;
 
 import com.mygdx.hitboxcreator.events.EventDispatcher;
+import com.mygdx.hitboxcreator.events.HitShapesChangedEvent;
 import com.mygdx.hitboxcreator.events.ProjectPropertyChangedEvent;
 import com.mygdx.hitboxcreator.statehash.StateHashUtils;
 import com.mygdx.hitboxcreator.statehash.StateHashable;
+
 
 import java.util.ArrayList;
 
@@ -50,12 +52,14 @@ public class ProjectModel implements StateHashable {
 
     public void addHitShape(HitShape hitShape) {
         hitShapes.add(hitShape);
+        eventDispatcher.postEvent(new HitShapesChangedEvent(HitShapesChangedEvent.Action.QUANTITY_CHANGED));
     }
 
 
 
     public void removeHitShape(HitShape hitShape) {
-            hitShapes.removeValue(hitShape, true);
+        hitShapes.removeValue(hitShape, true);
+        eventDispatcher.postEvent(new HitShapesChangedEvent(HitShapesChangedEvent.Action.QUANTITY_CHANGED));
     }
 
     public Array<HitShape> getHitShapes() {

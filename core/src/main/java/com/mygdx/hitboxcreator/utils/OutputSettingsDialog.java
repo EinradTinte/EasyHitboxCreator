@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.I18NBundle;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.github.czyzby.lml.annotation.LmlAction;
@@ -20,8 +21,10 @@ import com.kotcrab.vis.ui.util.highlight.BaseHighlighter;
 import com.kotcrab.vis.ui.widget.HighlightTextArea;
 import com.kotcrab.vis.ui.widget.VisDialog;
 import com.kotcrab.vis.ui.widget.VisImageButton;
+import com.kotcrab.vis.ui.widget.VisLabel;
 import com.mygdx.hitboxcreator.App;
 import com.mygdx.hitboxcreator.controller.OutputSettingsDialogController;
+import com.mygdx.hitboxcreator.events.HitShapesChangedEvent;
 import com.mygdx.hitboxcreator.services.OutputFormatService;
 
 import java.util.ArrayList;
@@ -29,21 +32,27 @@ import java.util.ArrayList;
 public class OutputSettingsDialog extends VisDialog implements ActionContainer {
 
     private final String LML_PATH = "lml/outputSettingsDialogContent.lml";
+    private final float[] rec1preview = new float[] {0, 20, 100, 100};
+    private final float[] rec2preview = new float[] {20, 15, 120, 30};
+    private final float[] cir1preview = new float[] {70, 25, 30};
+    private final float[] cir2preview = new float[] {50, 50, 18};
 
-    OutputFormatService formatService;
+    private OutputFormatService formatService;
+    private OutputBuilder outputBuilder;
     private Stage stage;
     private I18NBundle strings;
     private OutputFormat outputFormat;
 
-    @LmlActor("slboxFormat") SelectBox slboxFormat;
-    @LmlActor("htaMarkupRectangle") HighlightTextArea htaMarkupRectangle;
-    @LmlActor("htaMarkupCircle") HighlightTextArea htaMarkupCircle;
-    @LmlActor("btnOutputFormatNew") VisImageButton btnOutputFormatNew;
-    @LmlActor("btnOutputFormatCopy") VisImageButton btnOutputFormatCopy;
-    @LmlActor("btnOutputFormatDel") VisImageButton btnOutputFormatDel;
+    @LmlActor("slboxFormat") private SelectBox slboxFormat;
+    @LmlActor("htaMarkupRectangle") private HighlightTextArea htaMarkupRectangle;
+    @LmlActor("htaMarkupCircle") private HighlightTextArea htaMarkupCircle;
+    @LmlActor("btnOutputFormatNew") private VisImageButton btnOutputFormatNew;
+    @LmlActor("btnOutputFormatCopy") private VisImageButton btnOutputFormatCopy;
+    @LmlActor("btnOutputFormatDel") private VisImageButton btnOutputFormatDel;
+    @LmlActor("taMarkupPreview") private VisLabel taMarkupPreview;
 
     public OutputSettingsDialog() {
-        super("Platzhalter");
+        super("");
 
         strings = App.inst().getI18NBundle();
 
@@ -54,6 +63,8 @@ public class OutputSettingsDialog extends VisDialog implements ActionContainer {
         button(strings.format("buttonOk"), "ok");
         button(strings.format("buttonCancel"), "cancel");
         setResizable(false);
+        getContentTable().align(Align.left);
+
 
         // Parsing the content
         LmlParser parser = App.inst().getParser();
@@ -71,15 +82,16 @@ public class OutputSettingsDialog extends VisDialog implements ActionContainer {
         btnOutputFormatNew = (VisImageButton) map.get("btnOutputFormatNew");
         btnOutputFormatCopy = (VisImageButton) map.get("btnOutputFormatCopy");
         btnOutputFormatDel = (VisImageButton) map.get("btnOutputFormatDel");
+        taMarkupPreview = (VisLabel) map.get("taMarkupPreview");
     }
 
     private void init() {
         stage = App.inst().getStage();
         strings = App.inst().getI18NBundle();
         formatService = App.inst().getOutputFormatService();
+        outputBuilder = new OutputBuilder(formatService.getOutputFormat(0));
         htaMarkupRectangle.setHighlighter(buildSyntaxHighlighter(Color.CYAN, HitRectangle.attributes));
         htaMarkupCircle.setHighlighter(buildSyntaxHighlighter(Color.CYAN, HitCircle.attributes));
-        // TODO: get last selected
         updateSlboxItems();
         setFormatTexts();
     }
@@ -96,6 +108,7 @@ public class OutputSettingsDialog extends VisDialog implements ActionContainer {
     protected void result(Object object) {
         if ((object).equals("ok")) {
             formatService.setSelectedFormat((String) slboxFormat.getSelected());
+            App.inst().getEventDispatcher().postEvent(new HitShapesChangedEvent(HitShapesChangedEvent.Action.FORM_CHANGED));
         }
         saveFormats();
     }
@@ -176,15 +189,26 @@ public class OutputSettingsDialog extends VisDialog implements ActionContainer {
 
     /** Updates format on change. */
     @LmlAction("onhtaMarkupChange") void onhtaMarkupChange(HighlightTextArea hta) {
+
         if (hta.getName().contains("Rectangle")) {
             outputFormat.setMarkup(OutputFormat.Type.RECTANGLE, hta.getText());
         } else if (hta.getName().contains("Circle")) {
             outputFormat.setMarkup(OutputFormat.Type.CIRCLE, hta.getText());
         }
+        setTextPreview();
     }
 
+    /** Updating the preview text. */
+    private void setTextPreview() {
+        outputBuilder.begin();
 
+        outputBuilder.add(OutputFormat.Type.RECTANGLE, rec1preview);
+        outputBuilder.add(OutputFormat.Type.RECTANGLE, rec2preview);
+        outputBuilder.add(OutputFormat.Type.CIRCLE, cir1preview);
+        outputBuilder.add(OutputFormat.Type.CIRCLE, cir2preview);
 
+        taMarkupPreview.setText(outputBuilder.end());
+    }
 
 
     /** Sets the text in the HighlightTextAreas according to selected format.
@@ -194,8 +218,17 @@ public class OutputSettingsDialog extends VisDialog implements ActionContainer {
         OutputFormat format = formatService.getOutputFormat(slboxFormat.getSelectedIndex());
         outputFormat = format;
 
+        htaMarkupRectangle.setText(format.getMarkup(OutputFormat.Type.RECTANGLE) +" ");
+        htaMarkupCircle.setText(format.getMarkup(OutputFormat.Type.CIRCLE) +" ");
+
+        outputBuilder.setOutputFormat(format);
+        // hack to fix text not fully shown when to wide
+        stage.draw();
         htaMarkupRectangle.setText(format.getMarkup(OutputFormat.Type.RECTANGLE));
         htaMarkupCircle.setText(format.getMarkup(OutputFormat.Type.CIRCLE));
+
+
+        setTextPreview();
 
         htaMarkupRectangle.setReadOnly(!format.isDeletable());
         htaMarkupCircle.setReadOnly(!format.isDeletable());

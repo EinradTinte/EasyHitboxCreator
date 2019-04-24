@@ -11,8 +11,15 @@ import java.util.regex.Pattern;
 public class OutputBuilder {
 
     private String text;
+    private String rectangleText, circleText;
+    private String seperator, rectangleSeperator, circleSeperator;
+    private String begin, end;
+
+
     private boolean isBuilding = false;
     private OutputFormat outputFormat;
+
+
 
     public OutputBuilder(OutputFormat format) {
         outputFormat = format;
@@ -24,6 +31,15 @@ public class OutputBuilder {
             throw new IllegalStateException("OutputBuilder.end must be called before begin.");
 
         text = "";
+        rectangleText = "";
+        circleText = "";
+
+        rectangleSeperator = "\n";
+        circleSeperator = "\n";
+        seperator = "\n";
+        begin = "";
+        end = "";
+
         isBuilding = true;
     }
 
@@ -31,7 +47,17 @@ public class OutputBuilder {
         if (!isBuilding)
             throw new IllegalStateException("OutputBuilder.begin must be called before add.");
 
-        text += outputFormat.getOutputString(type, data) +'\n';
+        String s = outputFormat.getOutputString(type, data);
+        switch (type) {
+            case RECTANGLE:
+                if (!rectangleText.equals("")) rectangleText += rectangleSeperator;
+                rectangleText += s;
+                break;
+            case CIRCLE:
+                if (!circleText.equals("")) circleText += circleSeperator;
+                circleText += s;
+                break;
+        }
     }
 
     public String end() {
@@ -39,7 +65,7 @@ public class OutputBuilder {
             throw new IllegalStateException("OutputBuilder.begin must be called before end.");
 
         isBuilding = false;
-        return text;
+        return begin + rectangleText + seperator + circleText + end;
     }
 
     public void setOutputFormat(OutputFormat outputFormat) {

@@ -14,9 +14,9 @@
 			<:import path="lml/sidebutton.lml"/>
 
 			<container grow="true" fill="true">
-				<vissplitpane id="mainSplitPane" horizontal="true " min="0.15" max="0.5" value="0.3">
-		    		<container  fill="true" >
-						<vissplitpane id="packListSplitPane" vertical="true" min="0.2" max="0.7" value="0.2">
+				<vissplitpane id="mainSplitPane" horizontal="true " min="0.15" max="0.5" value="0.31">
+		    		<vistable  align="top" onecolumn="true" defaultgrowx="true">
+
 
 							<container fill="true">
 								<:titledpane id="titledPaneProject" title="@panelTitleProject" icon="custom/ic-title-packs">
@@ -24,14 +24,17 @@
 								</:titledpane>
 							</container>
 
-							<container fill="true">
+
+						<:row />
+
+							<container fill="true" growy="true">
 								<:titledpane id="titledPaneOutput" title="@panelTitleOutput" icon="custom/ic-title-exclamation">
 									<:import path="lml/paneOutput.lml"/>
 								</:titledpane>
 							</container>
 
-						</vissplitpane>
-		    		</container>
+
+		    		</vistable>
 
 
 		    		<container fill="true">

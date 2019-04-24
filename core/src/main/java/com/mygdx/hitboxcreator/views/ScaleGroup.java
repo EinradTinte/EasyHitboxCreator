@@ -26,24 +26,10 @@ public class ScaleGroup extends Group {
     private ProjectModel project;
     private Texture tObject;
     private Image imgObject = new Image();
-    private EventDispatcher eventDispatcher;
+
 
 
     public ScaleGroup() {
-        eventDispatcher = App.inst().getEventDispatcher();
-
-        addActor(imgObject);
-
-
-
-
-        //project = new ProjectModel();
-        //reloadImage(Gdx.files.internal("obstacle3_intact.png").path());
-
-        //addHitShape(new HitRectangle(50, 50, 200, 100));
-        //addHitShape(new HitRectangle(100, 100, 100, 200));
-
-
     }
 
     /** Circles calculate their segment count for smooth drawing according to their size and the groups
@@ -70,10 +56,7 @@ public class ScaleGroup extends Group {
         return super.removeActor(actor, unfocus);
     }
 
-    @Override
-    protected void childrenChanged() {
-        eventDispatcher.postEvent(new HitShapesChangedEvent(HitShapesChangedEvent.Action.QUANTITY_CHANGED));
-    }
+
 
     public void reloadProject(ProjectModel project) {
         this.project = project;

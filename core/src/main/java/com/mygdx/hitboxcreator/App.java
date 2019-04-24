@@ -12,11 +12,15 @@ import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.I18NBundle;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.github.czyzby.lml.annotation.LmlAction;
 import com.github.czyzby.lml.parser.LmlParser;
 import com.github.czyzby.lml.util.LmlApplicationListener;
 import com.github.czyzby.lml.vis.util.VisLml;
@@ -24,6 +28,7 @@ import com.kotcrab.vis.ui.VisUI;
 import com.mygdx.hitboxcreator.events.EventDispatcher;
 import com.mygdx.hitboxcreator.lml.AppLmlSyntax;
 import com.mygdx.hitboxcreator.services.ModelService;
+import com.mygdx.hitboxcreator.utils.GlobalActions;
 import com.mygdx.hitboxcreator.utils.OutputBuilder;
 import com.mygdx.hitboxcreator.views.MainView;
 import com.mygdx.hitboxcreator.services.OutputFormatService;
@@ -33,7 +38,7 @@ import com.mygdx.hitboxcreator.controller.OutputSettingsDialogController;
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class App extends LmlApplicationListener {
     private static App instance;
-    public static final int WIDTH = 900, HEIGHT = 400;
+    public static final int WIDTH = 1000, HEIGHT = 550;
 
 
     private PolygonSpriteBatch batch;
@@ -79,7 +84,7 @@ public class App extends LmlApplicationListener {
 
 
 
-        //Gdx.graphics.setContinuousRendering(false);
+        Gdx.graphics.setContinuousRendering(false);
 
 
 
@@ -131,7 +136,7 @@ public class App extends LmlApplicationListener {
         return VisLml.parser()
                 .syntax(new AppLmlSyntax())
                 // registering action container class
-                //.actions("outputSettingsHandler", new OutputSettingsDialogController())
+                .actions("global", new GlobalActions())
                 .i18nBundle(strings).build();
     }
 
@@ -239,9 +244,6 @@ public class App extends LmlApplicationListener {
 
 
 
-
-
-
     @Override
     public void dispose() {
         // calls dispose() on each stored view
@@ -268,6 +270,8 @@ public class App extends LmlApplicationListener {
         static public final int Arrow = 7;
         static public final int Hand = 8;
     }
+
+
 
 
 }

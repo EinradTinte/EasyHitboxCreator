@@ -17,7 +17,7 @@
         <vissplitpane min="0.5" max="0.9" value="0.6">
             <visscrollpane disabledx="true" flickscroll="false" overscroll="false" fadescrollbars="false" style="minimal" oncreate="getScrollOnHover">
                 <vistable onecolumn="true" padright="4" align="top">
-                    <vistable growx="true" tooltip="@outputSettingTtMarkupRectangle" height="100" tablealign="top">
+                    <vistable growx="true" height="100" tablealign="top">
                         <vislabel text="@outputSettingsMarkupRectangle" align="left" color="orange"/>
                         <:row padtop="4"/>
                         <scrollpane flickscroll="false" fadescrollbars="false" grow="true" barsontop="true">
@@ -27,7 +27,7 @@
 
                     <actor height="10"/>
 
-                    <vistable growx="true" tablealign="top" height="100" tooltip="@outputSettingTtMarkupRectangle">
+                    <vistable growx="true" tablealign="top" height="100" >
                         <vislabel text="@outputSettingsMarkupCircle" align="left" color="orange"/>
                         <:row padtop="4"/>
                         <scrollpane flickscroll="false" fadescrollbars="false" grow="true" >

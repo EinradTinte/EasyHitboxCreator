@@ -20,11 +20,11 @@ But the best part: The output is fully customizable. So whatever form you need t
 
 Simply add, move and resize "hitshapes" with your mouse.
 
-![](.github/main.gif)
+![](https://user-images.githubusercontent.com/46963081/56773433-5fc98400-67be-11e9-8bd6-f0cce0ad4519.gif)
 
 Fully customizable output with live preview to tailor the data to your needs.
 
-![](.github/format.gif)
+![](https://user-images.githubusercontent.com/46963081/56773464-87b8e780-67be-11e9-8287-8f7e0406c4db.gif)
 
 Save projects for later editing.
 

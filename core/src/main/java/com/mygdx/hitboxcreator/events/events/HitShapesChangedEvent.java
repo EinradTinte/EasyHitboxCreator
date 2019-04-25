@@ -1,4 +1,4 @@
-package com.mygdx.hitboxcreator.events;
+package com.mygdx.hitboxcreator.events.events;
 
 public class HitShapesChangedEvent extends Event {
     private final Action action;

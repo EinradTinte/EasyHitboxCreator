@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE menubar SYSTEM "/lml.dtd">
+
+<menubar id="menuBarTable" growx="true" style="main-menu" >
+    <menu id="muFile" text="@file" style="main-menu">
+        <menuitem
+            id="miFileNew"
+            text="@new"
+            onchange="newProject"
+            icon="custom/ic-project-new"/>
+        <menuitem
+            id="miFileOpen"
+            text="@open"
+            onchange="openProject"
+            icon="custom/ic-folder"/>
+        <menuitem
+            id="miFileSave"
+            text="@save"
+            onchange="saveProjectNoExit"
+            icon="custom/ic-save"/>
+        <menuitem
+            id="miFileSaveAs"
+            text="@saveAs"
+            onchange="saveProjectAs"
+            icon="custom/ic-save-aster"/>
+    </menu>
+</menubar>

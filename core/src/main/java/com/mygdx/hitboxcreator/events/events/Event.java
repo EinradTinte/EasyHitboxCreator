@@ -1,6 +1,4 @@
-package com.mygdx.hitboxcreator.events;
-
-import java.lang.reflect.Type;
+package com.mygdx.hitboxcreator.events.events;
 
 public abstract class Event {
 

@@ -1,13 +1,12 @@
-package com.mygdx.hitboxcreator.utils;
+package com.mygdx.hitboxcreator.services;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
+import com.mygdx.hitboxcreator.hitshapes.HitCircle;
+import com.mygdx.hitboxcreator.hitshapes.HitRectangle;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

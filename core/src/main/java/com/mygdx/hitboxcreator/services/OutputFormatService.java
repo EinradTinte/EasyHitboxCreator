@@ -2,10 +2,7 @@ package com.mygdx.hitboxcreator.services;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Json;
-import com.mygdx.hitboxcreator.utils.OutputBuilder;
-import com.mygdx.hitboxcreator.utils.OutputFormat;
 
 import java.util.ArrayList;
 import java.util.List;

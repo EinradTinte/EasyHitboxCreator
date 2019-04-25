@@ -1,12 +1,4 @@
-package com.mygdx.hitboxcreator.utils;
-
-import com.badlogic.gdx.Gdx;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+package com.mygdx.hitboxcreator.services;
 
 public class OutputBuilder {
 
@@ -34,6 +26,7 @@ public class OutputBuilder {
         rectangleText = "";
         circleText = "";
 
+        // TODO: obtain these from outputFormat
         rectangleSeperator = "\n";
         circleSeperator = "\n";
         seperator = "\n";

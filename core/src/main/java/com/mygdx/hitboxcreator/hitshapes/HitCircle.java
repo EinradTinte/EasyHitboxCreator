@@ -1,18 +1,18 @@
-package com.mygdx.hitboxcreator.utils;
+package com.mygdx.hitboxcreator.hitshapes;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.PolygonRegion;
 import com.badlogic.gdx.graphics.g2d.PolygonSprite;
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.hitboxcreator.App;
+import com.mygdx.hitboxcreator.services.OutputFormat;
+import com.mygdx.hitboxcreator.statehash.StateHashUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,15 +20,13 @@ import java.util.Arrays;
 public class HitCircle extends HitShape {
     private float radius;
     private Color cBorder;
+    private PolygonSprite spBody, spBorder;
     private double angle;
     private int borderArea;
     private final float minRadius = 5;
 
-    private PolygonSprite spBody, spBorder;
-
     // Order in which attributes get passed
     public static ArrayList<String> attributes = new ArrayList<>(Arrays.asList("X", "Y", "RADIUS"));
-
 
 
     private final int top = 1;
@@ -40,20 +38,35 @@ public class HitCircle extends HitShape {
     private final int left = 7;
     private final int topLeft = 8;
 
+
+    public HitCircle() {}
+
     public HitCircle(float x, float y, final float radus) {
         this.radius = radus;
         setBounds(x - radius, y - radius, radius * 2, radius * 2);
-
-        setRegion();
-
-        highlightBorder();
+        init();
+    }
 
 
-        addPopupMenu();
+    @Override
+    public void write(Json json) {
+        json.writeValue("x", getX());
+        json.writeValue("y", getY());
+        json.writeValue("radius", radius);
+    }
 
-        somethingChanged();
+    @Override
+    public void read(Json json, JsonValue jsonValue) {
+        setX(jsonValue.getFloat("x"));
+        setY(jsonValue.getFloat("y"));
+        radius = jsonValue.getFloat("radius");
 
-        //region --- inputListener ---
+        init();
+    }
+
+
+    @Override
+    void initListener() {
         addListener(new HitShapeInputListener() {
 
 
@@ -157,13 +170,16 @@ public class HitCircle extends HitShape {
                 lastPos.set(x-mx-(dx-dxp), y-my-(dy-dyp));
             }
         });
-        //endregion
     }
-
 
     @Override
     public OutputFormat.Type getType() {
         return OutputFormat.Type.CIRCLE;
+    }
+
+    @Override
+    public int computeStateHash() {
+        return StateHashUtils.computeHash(getX(), getY(), radius);
     }
 
     @Override

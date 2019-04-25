@@ -1,24 +1,17 @@
 package com.mygdx.hitboxcreator.views;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.PolygonRegion;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.TextTooltip;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.I18NBundle;
 import com.github.czyzby.lml.parser.LmlParser;
 import com.github.czyzby.lml.parser.impl.tag.AbstractNonParentalActorLmlTag;
 import com.github.czyzby.lml.parser.tag.LmlActorBuilder;
@@ -28,20 +21,23 @@ import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.MenuItem;
 import com.kotcrab.vis.ui.widget.PopupMenu;
 import com.kotcrab.vis.ui.widget.VisImageButton;
-import com.kotcrab.vis.ui.widget.VisImageTextButton;
 import com.kotcrab.vis.ui.widget.VisTable;
 import com.mygdx.hitboxcreator.App;
-import com.mygdx.hitboxcreator.utils.HitCircle;
-import com.mygdx.hitboxcreator.utils.HitRectangle;
-import com.mygdx.hitboxcreator.utils.ProjectModel;
+import com.mygdx.hitboxcreator.events.events.Event;
+import com.mygdx.hitboxcreator.events.EventListener;
+import com.mygdx.hitboxcreator.events.events.HitShapesChangedEvent;
+import com.mygdx.hitboxcreator.events.events.ProjectChangedEvent;
+import com.mygdx.hitboxcreator.hitshapes.HitCircle;
+import com.mygdx.hitboxcreator.hitshapes.HitRectangle;
+import com.mygdx.hitboxcreator.services.ProjectModel;
 
 public class Editor extends Stack {
 
-    private InfoPanel infoPanel;
-    private CanvasHolder canvasHolder;
-    private Image imgBackground;
-    private VisImageButton btnRectangle, btnCircle;
-    private ScaleGroup group;
+    private final InfoPanel infoPanel;
+    private final CanvasHolder canvasHolder;
+    private final Image imgBackground;
+    private final VisImageButton btnRectangle, btnCircle;
+    private final ScaleGroup group;
 
     private final float DEFAULT_HITSHAPE_SIZE = 25;
 
@@ -76,7 +72,7 @@ public class Editor extends Stack {
 
             // HitShapes
             {
-                canvasHolder = new CanvasHolder(skin);
+                canvasHolder = new CanvasHolder();
                 canvasHolder.setListener(new CanvasHolder.Listener() {
                     @Override
                     public void onZoomChanged(int percentage) {
@@ -99,7 +95,7 @@ public class Editor extends Stack {
                 btnRectangle.addListener(new ChangeListener() {
                     @Override
                     public void changed(ChangeEvent changeEvent, Actor actor) {
-                        Vector2 pos = convertToScaleGroupPos((getWidth() - 100) - DEFAULT_HITSHAPE_SIZE*group.getScaleX(), 100 - DEFAULT_HITSHAPE_SIZE*group.getScaleX());
+                        Vector2 pos = convertToScaleGroupPos((getWidth() - 150) - DEFAULT_HITSHAPE_SIZE*group.getScaleX(), 120 - DEFAULT_HITSHAPE_SIZE*group.getScaleX());
                         group.addHitShape(new HitRectangle(pos.x, pos.y, DEFAULT_HITSHAPE_SIZE*2, DEFAULT_HITSHAPE_SIZE*2));
                     }
                 });
@@ -111,7 +107,7 @@ public class Editor extends Stack {
                 btnCircle.addListener(new ChangeListener() {
                     @Override
                     public void changed(ChangeEvent changeEvent, Actor actor) {
-                        Vector2 pos = convertToScaleGroupPos(getWidth() - 100, 50);
+                        Vector2 pos = convertToScaleGroupPos(getWidth() - 150, 60);
                         group.addHitShape(new HitCircle(pos.x, pos.y, DEFAULT_HITSHAPE_SIZE));
                     }
                 });
@@ -135,7 +131,42 @@ public class Editor extends Stack {
                 addActor(infoPanel);
             }
         }
+
+        initEventListener();
     }
+
+
+    private void initEventListener() {
+        App.inst().getEventDispatcher().addEventListener(new EventListener() {
+            @Override
+            public void receiveEvent(Event event) {
+                if (event.is(ProjectChangedEvent.class)) {
+                    switch (((ProjectChangedEvent) event).getProperty()) {
+                        case IMG:
+                            String imgPath = ((ProjectChangedEvent) event).getProject().getImage();
+                            infoPanel.setImgDimens(imgPath);
+                            group.reloadImage(imgPath);
+                            canvasHolder.setZoomIndex(CanvasHolder.DEFAULT_ZOOM_INDEX);
+                            break;
+                        case LOADED:
+                            ProjectModel project = ((ProjectChangedEvent) event).getProject();
+                            group.reloadProject(project);
+                            infoPanel.setImgDimens(project.getImage());
+                            infoPanel.setHitShapeCount(project.getHitShapes());
+                            canvasHolder.setZoomIndex(CanvasHolder.DEFAULT_ZOOM_INDEX);
+                            break;
+                    }
+                } else if (event.is(HitShapesChangedEvent.class)) {
+                    switch (((HitShapesChangedEvent) event).getAction()) {
+                        case QUANTITY_CHANGED:
+                            infoPanel.setHitShapeCount(App.inst().getModelService().getProject().getHitShapes());
+                            break;
+                    }
+                }
+            }
+        });
+    }
+
 
     private Vector2 convertToScaleGroupPos(float x, float y) {
         return new Vector2((x - group.getX())/group.getScaleX(), (y - group.getY())/group.getScaleY());

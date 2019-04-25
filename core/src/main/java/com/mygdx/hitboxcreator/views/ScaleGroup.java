@@ -1,22 +1,13 @@
 package com.mygdx.hitboxcreator.views;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.mygdx.hitboxcreator.App;
-import com.mygdx.hitboxcreator.events.EventDispatcher;
-import com.mygdx.hitboxcreator.events.HitShapesChangedEvent;
-import com.mygdx.hitboxcreator.events.InfoPropertyChangedEvent;
-import com.mygdx.hitboxcreator.utils.HitCircle;
-import com.mygdx.hitboxcreator.utils.HitRectangle;
-import com.mygdx.hitboxcreator.utils.HitShape;
-import com.mygdx.hitboxcreator.utils.ProjectModel;
+import com.mygdx.hitboxcreator.hitshapes.HitShape;
+import com.mygdx.hitboxcreator.services.ProjectModel;
 
 
 
@@ -60,7 +51,6 @@ public class ScaleGroup extends Group {
     }
 
 
-
     public void reloadProject(ProjectModel project) {
         this.project = project;
         clear();
@@ -70,6 +60,7 @@ public class ScaleGroup extends Group {
         }
         reloadImage(project.getImage());
     }
+
 
     public void reloadImage(String imgPath) {
         if (tObject != null) tObject.dispose();
@@ -98,13 +89,6 @@ public class ScaleGroup extends Group {
     public void centerOnParent(float x, float y) {
         setPosition((getParent().getWidth() / 2) - x, (getParent().getHeight() / 2) - y);
     }
-
-    @Override
-    protected void sizeChanged() {
-
-    }
-
-
 
 
 }

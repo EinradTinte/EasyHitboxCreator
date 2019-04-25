@@ -1,24 +1,26 @@
-package com.mygdx.hitboxcreator.utils;
+package com.mygdx.hitboxcreator.hitshapes;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.utils.Json;
+import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.MenuItem;
 import com.kotcrab.vis.ui.widget.PopupMenu;
 import com.mygdx.hitboxcreator.App;
 import com.mygdx.hitboxcreator.events.EventDispatcher;
-import com.mygdx.hitboxcreator.events.HitShapesChangedEvent;
+import com.mygdx.hitboxcreator.events.events.HitShapesChangedEvent;
+import com.mygdx.hitboxcreator.services.OutputFormat;
+import com.mygdx.hitboxcreator.statehash.StateHashable;
 
-public abstract class HitShape extends Actor {
+public abstract class HitShape extends Actor implements Json.Serializable, StateHashable {
 
 
     Color cBody;
@@ -28,47 +30,27 @@ public abstract class HitShape extends Actor {
     static Color cBorderSelected = new Color(0,0,1,1);
     static Color cSelected = new Color(0, 0, 1, 0.7F);
 
-    boolean drawBorder = true;
-    float grabArea = 6;
+    static boolean drawBorder = true;
     static float borderWidth = 2;
+    float grabArea = 6;
     int selection;
     boolean isSelected;
-    int selectionSave;
+    private int selectionSave;
 
     TextureRegion region;
-    EventDispatcher eventDispatcher = App.inst().getEventDispatcher();
+    private EventDispatcher eventDispatcher = App.inst().getEventDispatcher();
 
     static final int NUM_COMPONENTS = 2;
 
+    abstract boolean contains(float x, float y);
 
+    abstract void highlightBorder();
 
-    void addPopupMenu() {
-        PopupMenu popupMenu = new PopupMenu() {
-            @Override
-            public boolean remove() {
-                isSelected = false;
-                highlightBorder();
-                return super.remove();
-            }
+    abstract void initListener();
 
-            @Override
-            public void showMenu(Stage stage, float x, float y) {
-                isSelected = true;
-                super.showMenu(stage, x, y);
-            }
-        };
-        //String text = App.inst().getI18NBundle().format("menuItemCanvas");
-        MenuItem menuItem = new MenuItem("Delete");
-        menuItem.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent changeEvent, Actor actor) {
-                remove();
-            }
-        });
-        popupMenu.addItem(menuItem);
+    public abstract float[] getData();
 
-        this.addListener(popupMenu.getDefaultInputListener());
-    }
+    public abstract OutputFormat.Type getType();
 
 
     public static void setColors(Color normalBody, Color selectedBody, Color normalBorder, Color selectedBorder) {
@@ -82,6 +64,57 @@ public abstract class HitShape extends Actor {
         borderWidth = width;
     }
 
+
+    /** Initializes all the things every HitShape has.
+     * The only thing subclasses have to do is setting there attributes and call init().*/
+    void init() {
+        setRegion();
+        addPopupMenu();
+        highlightBorder();
+        somethingChanged();
+        initListener();
+    }
+
+
+    /** To create a PolygonSprite that we can draw, we need a TextureRegion (1x1px & white).
+     * We load it once in the main class and refer to it. */
+    private void setRegion() {
+        region = App.inst().getRegion();
+    }
+
+
+    /** PopupMenu to delete HitShape */
+    private void addPopupMenu() {
+        PopupMenu popupMenu = new PopupMenu() {
+            @Override
+            public boolean remove() {
+                isSelected = false;
+                highlightBorder();
+                return super.remove();
+            }
+
+            @Override
+            public void showMenu(Stage stage, float x, float y) {
+                isSelected = true;
+                highlightBorder();
+                super.showMenu(stage, x, y);
+            }
+        };
+        String text = App.inst().getI18NBundle().format("delete");
+        MenuItem menuItem = new MenuItem(text, VisUI.getSkin().getDrawable("custom/ic-trash-red"),
+                new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent changeEvent, Actor actor) {
+                remove();
+            }
+        });
+        popupMenu.addItem(menuItem);
+
+        this.addListener(popupMenu.getDefaultInputListener());
+    }
+
+
+
     // this is exactly like super.hit() only I define my own "Hitzone"
     @Override
     public Actor hit(float x, float y, boolean touchable) {
@@ -92,15 +125,10 @@ public abstract class HitShape extends Actor {
 
 
 
-    abstract boolean contains(float x, float y);
-
-    abstract void highlightBorder();
-
 
 
     /**
-     * exit() and touchDown() already defined.
-     * Edit mouseMoved() and touchDragged()
+     * Set mouseMoved() and touchDragged()
      */
     class HitShapeInputListener extends InputListener {
         final Vector2 lastPos = new Vector2();
@@ -131,16 +159,23 @@ public abstract class HitShape extends Actor {
 
         @Override
         public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-            if (button != Input.Buttons.LEFT && button != Input.Buttons.RIGHT) return false;
-
-            selectionSave = selection;
-            toFront();
-            lastPos.set(x, y);
-            return true;
+            switch (button) {
+                case Input.Buttons.LEFT:
+                    selectionSave = selection;
+                    toFront();
+                    lastPos.set(x, y);
+                    return true;
+                case Input.Buttons.RIGHT:
+                    toFront();
+                    return false;
+                default:
+                    return false;
+            }
         }
 
 
     }
+
 
     /** Dispatches event when HitShape gets altered.
      * Subclasses will also use this method to update their PolygonSprites.
@@ -149,13 +184,6 @@ public abstract class HitShape extends Actor {
     public void somethingChanged() {
         eventDispatcher.postEvent(new HitShapesChangedEvent(HitShapesChangedEvent.Action.FORM_CHANGED));
     }
-
-    /** To create a PolygonSprite that we can draw, we need a TextureRegion (1x1px & white).
-     * We load it once in the main class and refer to it. */
-    void setRegion() {
-        region = App.inst().getRegion();
-    }
-
 
 
     /** One vertex consists of only x & y coordinate. This is a simple helper method to avoid mixing
@@ -170,10 +198,6 @@ public abstract class HitShape extends Actor {
         vertices[idx*NUM_COMPONENTS + 1] = y;
     }
 
-
-    public abstract float[] getData();
-
-    public abstract OutputFormat.Type getType();
 
 
 }

@@ -4,7 +4,7 @@
 <stack fillparent="true"  touchable="enabled" >
 	<vistable id="root" bgtiled="custom/background-fill">
 		
-		<container height="20" fillx="true"/>
+		<:import path="lml/mainMenu.lml"/>
 
 		<:row/>
 		

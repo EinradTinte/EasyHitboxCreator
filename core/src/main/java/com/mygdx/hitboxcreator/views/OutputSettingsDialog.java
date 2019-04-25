@@ -1,4 +1,4 @@
-package com.mygdx.hitboxcreator.utils;
+package com.mygdx.hitboxcreator.views;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -11,7 +11,6 @@ import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.Timer;
 import com.github.czyzby.lml.annotation.LmlAction;
 import com.github.czyzby.lml.annotation.LmlActor;
-import com.github.czyzby.lml.annotation.LmlAfter;
 import com.github.czyzby.lml.parser.LmlParser;
 import com.github.czyzby.lml.parser.action.ActionContainer;
 import com.kotcrab.vis.ui.util.InputValidator;
@@ -24,9 +23,12 @@ import com.kotcrab.vis.ui.widget.VisDialog;
 import com.kotcrab.vis.ui.widget.VisImageButton;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import com.mygdx.hitboxcreator.App;
-import com.mygdx.hitboxcreator.controller.OutputSettingsDialogController;
-import com.mygdx.hitboxcreator.events.HitShapesChangedEvent;
+import com.mygdx.hitboxcreator.events.events.HitShapesChangedEvent;
 import com.mygdx.hitboxcreator.services.OutputFormatService;
+import com.mygdx.hitboxcreator.hitshapes.HitCircle;
+import com.mygdx.hitboxcreator.hitshapes.HitRectangle;
+import com.mygdx.hitboxcreator.services.OutputBuilder;
+import com.mygdx.hitboxcreator.services.OutputFormat;
 
 import java.util.ArrayList;
 
@@ -60,8 +62,8 @@ public class OutputSettingsDialog extends VisDialog implements ActionContainer {
         this.getTitleLabel().setText(strings.format("dlgTitleOutputSettings"));
         addCloseButton();
         closeOnEscape();
-        button(strings.format("buttonOk"), "ok");
-        button(strings.format("buttonCancel"), "cancel");
+        button(strings.format("ok"), "ok");
+        button(strings.format("cancel"), "cancel");
         setResizable(false);
         getContentTable().align(Align.left);
 

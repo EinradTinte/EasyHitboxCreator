@@ -9,10 +9,9 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.github.czyzby.lml.parser.LmlParser;
 import com.github.czyzby.lml.parser.impl.DefaultLmlParser;
-import com.mygdx.hitboxcreator.events.InfoPropertyChangedEvent;
-import com.mygdx.hitboxcreator.utils.HitCircle;
-import com.mygdx.hitboxcreator.utils.HitRectangle;
-import com.mygdx.hitboxcreator.utils.HitShape;
+import com.mygdx.hitboxcreator.hitshapes.HitCircle;
+import com.mygdx.hitboxcreator.hitshapes.HitRectangle;
+import com.mygdx.hitboxcreator.hitshapes.HitShape;
 
 public class InfoPanel extends Container {
 

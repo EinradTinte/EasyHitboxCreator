@@ -1,35 +1,36 @@
-package com.mygdx.hitboxcreator.utils;
+package com.mygdx.hitboxcreator.services;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Array;
 
 import com.mygdx.hitboxcreator.events.EventDispatcher;
-import com.mygdx.hitboxcreator.events.HitShapesChangedEvent;
-import com.mygdx.hitboxcreator.events.ProjectPropertyChangedEvent;
+import com.mygdx.hitboxcreator.events.events.HitShapesChangedEvent;
+import com.mygdx.hitboxcreator.events.events.ProjectChangedEvent;
 import com.mygdx.hitboxcreator.statehash.StateHashUtils;
 import com.mygdx.hitboxcreator.statehash.StateHashable;
-
-
-import java.util.ArrayList;
+import com.mygdx.hitboxcreator.hitshapes.HitShape;
 
 public class ProjectModel implements StateHashable {
 
     private final Array<HitShape> hitShapes = new Array<>();
-    private FileHandle projectFile;
+    private transient FileHandle projectFile;
     private String imgPath;
+    private transient String name = "unnamed project";
+    public static final transient String PROJECT_FILE_EXT = "hbx";
 
-    private Color cBodyNormal;
-    static Color cBodySelected;
-    static Color cBorderNormal;
-    static Color cBorderSelected;
+    private transient Color cBodyNormal;
+    static transient Color cBodySelected;
+    static transient Color cBorderNormal;
+    static transient Color cBorderSelected;
 
-    private EventDispatcher eventDispatcher;
+    private transient EventDispatcher eventDispatcher;
 
 
     public ProjectModel() {
     }
+
+    public String getName() { return name; }
 
     public void setEventDispatcher(EventDispatcher eventDispatcher) {
         this.eventDispatcher = eventDispatcher;
@@ -37,6 +38,7 @@ public class ProjectModel implements StateHashable {
 
     public void setProjectFile(FileHandle projectFile) {
         this.projectFile = projectFile;
+        name = projectFile.file().getName();
     }
 
     public FileHandle getProjectFile() { return projectFile; }
@@ -44,7 +46,7 @@ public class ProjectModel implements StateHashable {
     public void setImage(String imgPath) {
         this.imgPath = imgPath;
         if (eventDispatcher != null) {
-            eventDispatcher.postEvent(new ProjectPropertyChangedEvent(this, ProjectPropertyChangedEvent.Property.IMG));
+            eventDispatcher.postEvent(new ProjectChangedEvent(this, ProjectChangedEvent.Property.IMG));
         }
     }
 

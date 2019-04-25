@@ -8,17 +8,11 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.Touchable;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
-import com.kotcrab.vis.ui.widget.MenuItem;
-import com.kotcrab.vis.ui.widget.PopupMenu;
 import com.mygdx.hitboxcreator.App;
-import com.mygdx.hitboxcreator.utils.GlobalActions;
-import com.mygdx.hitboxcreator.utils.HitShape;
+import com.mygdx.hitboxcreator.lml.actions.GlobalActions;
+import com.mygdx.hitboxcreator.hitshapes.HitShape;
 
 public class CanvasHolder extends WidgetGroup {
     private static final int[] ZOOM_LEVELS = {25, 33, 50, 66, 100, 150, 200, 300, 400, 600, 800, 1000};
@@ -30,21 +24,16 @@ public class CanvasHolder extends WidgetGroup {
     private Listener listener;
     private int zoomIndex = DEFAULT_ZOOM_INDEX;
 
-    Rectangle tmpRectangle = new Rectangle();
+    private Rectangle tmpRectangle = new Rectangle();
 
 
 
 
-    public CanvasHolder(Skin skin) {
-
-
-
+    public CanvasHolder() {
         addListener(new PanZoomListener());
         GlobalActions.getScrollOnHover(this);
         group = new ScaleGroup();
         addActor(group);
-
-
     }
 
 

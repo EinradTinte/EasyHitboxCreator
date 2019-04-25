@@ -37,9 +37,7 @@
 		settingsInternalPanel: {name: white, color: {hex:202020ff} }
 		mainMenuBg: {name: white, color: dark-grey }
 		darkBorder: {name: custom/white_frame, color: grey }
-		listBorder: {name: custom/list-border, color: white }
-		progressBarErr: {name: progressbar-narrow-white, color: orange }
-		progressBarSucc: {name: progressbar-narrow-white, color: light-green }
+		listBorder: {name: custom/list-border, color: white }		
 		packingItemBg: {name: white, color: dark-grey }
 		canvasInfoPanel: {name: white, color: {hex:252526ff} }
 		noPreviewFill: {name: white, color: {hex:000000aa} }
@@ -48,8 +46,7 @@
 	com.badlogic.gdx.scenes.scene2d.ui.Button$ButtonStyle: {
 		default: {down: button-down, up: button }
 		orange: {down: button-orange-down, up: button-orange }
-		toggle: {checked: button-down, down: button-down, up: button }
-		dragndrop: {down: custom/dragndrop-area-down, over: custom/dragndrop-area-down, up: custom/dragndrop-area-up }
+		toggle: {checked: button-down, down: button-down, up: button }		
 	}
 	com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle: {
 		default: {over: button-over, disabled: button, font: default-font, fontColor: white, disabledFontColor: grey, down: button-down, up: button }
@@ -86,20 +83,11 @@
 		resizable: {stageBackground: dialogDim, titleFont: default-font, titleFontColor: white, background: window-resizable}
 		noborder: {stageBackground: dialogDim, titleFont: default-font, titleFontColor: white, background: window-noborder}
 		dialog: {stageBackground: dialogDim, titleFont: default-font, titleFontColor: white, background: window}
-	}
-	com.badlogic.gdx.scenes.scene2d.ui.ProgressBar$ProgressBarStyle: {
-		default-horizontal: {background: progressbar, knob: progressbar-filled, knobBefore: progressbar-filled }
-		default-vertical: {background: progressbar-vertical, knob: progressbar-filled-vertical, knobBefore: progressbar-filled-vertical }
-		narrow-horizontal: {background: progressbar-narrow, knob: progressbar-narrow-filled, knobBefore: progressbar-narrow-filled }
-		narrow-horizontal-grey: {background: progressbar-narrow, knob: progressbar-narrow-filled-grey, knobBefore: progressbar-narrow-filled-grey }
-		orange-horizontal: {background: progressbar, knob: progressbar-filled-orange, knobBefore: progressbar-filled-orange }
-		orange-vertical: {background: progressbar-vertical, knob: progressbar-filled-vertical-orange, knobBefore: progressbar-filled-vertical-orange }
-	}
+	}	
 	com.badlogic.gdx.scenes.scene2d.ui.Slider$SliderStyle: {
 		default-horizontal: {background: slider, knob: slider-knob, knobOver: slider-knob-over, knobDown: slider-knob-down, disabledKnob: slider-knob-disabled }
 		default-vertical: {background: slider-vertical, knob: slider-knob, knobOver: slider-knob-over, knobDown: slider-knob-down, disabledKnob: slider-knob-disabled }
-		seekbar: {background: custom/seekbar-background, knob: custom/seekbar-knob-up, knobOver: custom/seekbar-knob-over, knobBefore: custom/seekbar-fill-before }
-		seekbar-small: {background: custom/seekbar-background-small, knob: custom/seekbar-knob-up-small, knobOver: custom/seekbar-knob-over-small, knobBefore: custom/seekbar-fill-before-small }
+		
 	}
 	com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
 		default: {font: default-font, fontColor: white }
@@ -160,6 +148,8 @@
 		close-window: {up: button-window-bg, down: button-down, over: button-over, imageUp: icon-close, disabled: button }
 		pack-log: {down: button-down, over: button-over}
 		accent: {down: button-down, up: button-accent, over: button-accent-over, disabled: button, focusBorder: border }
+		addRec: {up: custom/btnRectangle_Up, down: custom/btnRectangle_Down, over: custom/btnRectangle_Over}
+		addCir: {up: custom/btnCircle_Up, down: custom/btnCircle_Down, over: custom/btnCircle_Over}
 	}
 	com.kotcrab.vis.ui.widget.VisImageTextButton$VisImageTextButtonStyle: {
 		default: {down: button-down, up: button, over: button-over, disabled: button, font: default-font, fontColor: white, disabledFontColor: grey, focusBorder: border }

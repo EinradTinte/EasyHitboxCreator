@@ -1,59 +1,60 @@
-package com.mygdx.hitboxcreator.utils;
+package com.mygdx.hitboxcreator.hitshapes;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.PolygonRegion;
 import com.badlogic.gdx.graphics.g2d.PolygonSprite;
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.hitboxcreator.App;
+import com.mygdx.hitboxcreator.services.OutputFormat;
+import com.mygdx.hitboxcreator.statehash.StateHashUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class HitRectangle extends HitShape {
     private Color cLeft, cRight, cBottom, cTop;
-
+    private PolygonSprite spBody, spLeft, spRight, spTop, spBottom;
 
     private Vector2 tmpV = new Vector2();
-
-
     private short[] triangles = {0,1,2, 0,2,3};
-
-
-
-    private PolygonSprite spBody, spLeft, spRight, spTop, spBottom;
 
     // Order in which attributes get passed
     public static ArrayList<String> attributes = new ArrayList<>(Arrays.asList("X", "Y", "WIDTH", "HEIGHT"));
 
 
+    public HitRectangle() {}
 
     public HitRectangle(float x, float y, float width, float height) {
-
-
-
-
         setBounds(x, y, width, height);
+        init();
+    }
+
+    @Override
+    public void write(Json json) {
+        json.writeValue("x", getX());
+        json.writeValue("y", getY());
+        json.writeValue("width", getWidth());
+        json.writeValue("height", getHeight());
+    }
+
+    @Override
+    public void read(Json json, JsonValue jsonValue) {
+        setX(jsonValue.getFloat("x"));
+        setY(jsonValue.getFloat("y"));
+        setWidth(jsonValue.getFloat("width"));
+        setHeight(jsonValue.getFloat("height"));
+
+        init();
+    }
 
 
-        setRegion();
-
-
-        addPopupMenu();
-
-        highlightBorder();
-
-
-
-        // actually at this point parent is not yet set so we have to look for this in the calculateSegmentCount() method
-        somethingChanged();
-
-
-        //region --- inputListener ---
+    @Override
+    void initListener() {
         addListener(new HitShapeInputListener() {
 
 
@@ -112,10 +113,7 @@ public class HitRectangle extends HitShape {
                 lastPos.set(x-mx-(dx-dxp), y-my-(dy-dyp));
             }
         });
-        //endregion
-
     }
-
 
     @Override
     public OutputFormat.Type getType() {
@@ -125,6 +123,11 @@ public class HitRectangle extends HitShape {
     @Override
     boolean contains(float x, float y) {
         return x >= -grabArea && x < getWidth()+grabArea && y >= -grabArea && y < getHeight()+grabArea;
+    }
+
+    @Override
+    public int computeStateHash() {
+        return StateHashUtils.computeHash(getX(), getY(), getWidth(), getHeight());
     }
 
     @Override

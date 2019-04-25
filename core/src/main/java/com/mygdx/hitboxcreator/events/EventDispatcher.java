@@ -1,7 +1,7 @@
 package com.mygdx.hitboxcreator.events;
 
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.SnapshotArray;
+import com.mygdx.hitboxcreator.events.events.Event;
 
 public class EventDispatcher {
     private SnapshotArray<EventListener> listeners;

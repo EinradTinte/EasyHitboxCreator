@@ -1,5 +1,7 @@
 package com.mygdx.hitboxcreator.events;
 
+import com.mygdx.hitboxcreator.events.events.Event;
+
 public class EventListener {
 
     public EventListener() {}

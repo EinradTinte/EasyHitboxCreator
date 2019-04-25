@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!DOCTYPE visdialog SYSTEM "/lml.dtd">
+
+<visdialog
+    title="@dlgTitleUnsavedChanges"
+    resizeable="false"
+    movable="false">
+
+    <label id="dlgTextUnsavedChanges" text=""/>
+
+    <table tablealign="center" defaultpadright="4" tobuttontable="true" growx="true">
+        <textbutton text="@yes" result="false" id="unsavedChangesYes"/>
+        <textbutton text="@no" result="false" id="unsavedChangesNo"/>
+        <textbutton text="@cancel" result="false"/>
+    </table>
+
+</visdialog>

@@ -1,8 +1,6 @@
 package com.mygdx.hitboxcreator;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Preferences;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -12,27 +10,23 @@ import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.I18NBundle;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.github.czyzby.lml.annotation.LmlAction;
+import com.github.czyzby.kiwi.util.gdx.GdxUtilities;
 import com.github.czyzby.lml.parser.LmlParser;
 import com.github.czyzby.lml.util.LmlApplicationListener;
 import com.github.czyzby.lml.vis.util.VisLml;
 import com.kotcrab.vis.ui.VisUI;
+import com.kotcrab.vis.ui.widget.file.FileChooser;
 import com.mygdx.hitboxcreator.events.EventDispatcher;
 import com.mygdx.hitboxcreator.lml.AppLmlSyntax;
 import com.mygdx.hitboxcreator.services.ModelService;
-import com.mygdx.hitboxcreator.utils.GlobalActions;
-import com.mygdx.hitboxcreator.utils.OutputBuilder;
+import com.mygdx.hitboxcreator.lml.actions.GlobalActions;
 import com.mygdx.hitboxcreator.views.MainView;
 import com.mygdx.hitboxcreator.services.OutputFormatService;
-import com.mygdx.hitboxcreator.controller.OutputSettingsDialogController;
 
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
@@ -40,26 +34,15 @@ public class App extends LmlApplicationListener {
     private static App instance;
     public static final int WIDTH = 1000, HEIGHT = 550;
 
-
     private PolygonSpriteBatch batch;
     private Viewport viewport;
-
-    private I18NBundle strings;
-
     private Stage stage;
 
-    private  Skin skin;
-
     private TextureRegion region;
-
-
     private Cursor cMove, cResize_ne, cResize_nw;
 
-
-
-
+    private I18NBundle strings;
     private OutputFormatService outputFormatService;
-
     private ModelService modelService;
     private EventDispatcher eventDispatcher;
 
@@ -79,55 +62,37 @@ public class App extends LmlApplicationListener {
 
     @Override
     public void create() {
-
-
-
-
-
         Gdx.graphics.setContinuousRendering(false);
-
-
-
-        region = new TextureRegion(new Texture("white.png"));
-
-
-
 
         batch = new PolygonSpriteBatch();
         viewport = new ScreenViewport();
         stage = new Stage(viewport, batch);
 
-
-
-
-        // Loading custom Cursors
-        cMove = Gdx.graphics.newCursor(new Pixmap(Gdx.files.internal("cursor/cursor-move.png")), 17, 17);
-        cResize_ne = Gdx.graphics.newCursor(new Pixmap(Gdx.files.internal("cursor/cursor-resize-ne.png")), 9, 9);
-        cResize_nw = Gdx.graphics.newCursor(new Pixmap(Gdx.files.internal("cursor/cursor-resize-nw.png")), 9, 9);
-
-
         init();
-
-        //stage.setDebugAll(true);
-
 
 
         // calls createParser() & addDefaultActions()
         super.create();
 
-
-
-
         setView(MainView.class);
+        ((MainView) getCurrentView()).init();
+
+        // uncomment to create dtd-file
         //saveDtdSchema(Gdx.files.local("lml.dtd"));
 
-        //getParser().createView(OutputSettingsDialogController.class, Gdx.files.internal("lml/outputSettingsDialog.lml"));
 
-        ((MainView) getCurrentView()).initialize();
+        // File Menu receives a hover event on start up turning it orange. This disappears as soon as the mouse enters the
+        // stage. To avoid this behaviour we simulate a mouse movement.
+        stage.mouseMoved(100,100);
     }
 
 
-
+    @Override
+    public void exit() {
+        // not calling super because the "smooth hiding" doesn't look smooth at all
+        //super.exit();
+        GdxUtilities.exit();
+    }
 
 
     @Override
@@ -142,18 +107,24 @@ public class App extends LmlApplicationListener {
 
 
     private void init() {
+        FileChooser.setDefaultPrefsName("com.mygdx.hitboxcreator.filechooser");
         eventDispatcher = new EventDispatcher();
         modelService = new ModelService();
         strings = I18NBundle.createBundle(Gdx.files.internal("i18n/bundle"));
         outputFormatService = new OutputFormatService();
         initiateSkin();
+        GlobalActions.loadDirPrefs();
+        // Loading custom Cursors
+        cMove = Gdx.graphics.newCursor(new Pixmap(Gdx.files.internal("cursor/cursor-move.png")), 17, 17);
+        cResize_ne = Gdx.graphics.newCursor(new Pixmap(Gdx.files.internal("cursor/cursor-resize-ne.png")), 9, 9);
+        cResize_nw = Gdx.graphics.newCursor(new Pixmap(Gdx.files.internal("cursor/cursor-resize-nw.png")), 9, 9);
+        region = new TextureRegion(new Texture("white.png"));
     }
 
 
 
-
     public void initiateSkin() {
-        skin = new Skin();
+        Skin skin = new Skin();
 
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VisOpenSansKerned.ttf"));
 
@@ -185,8 +156,8 @@ public class App extends LmlApplicationListener {
         skin.add("small-font", fontSmall, BitmapFont.class);
         skin.add("big-font", fontBig, BitmapFont.class);
 
-        skin.addRegions(new TextureAtlas(Gdx.files.internal("skin/myuiskin.atlas")));
-        skin.load(Gdx.files.internal("skin/myuiskin.json"));
+        skin.addRegions(new TextureAtlas(Gdx.files.internal("skin/uiskin.atlas")));
+        skin.load(Gdx.files.internal("skin/uiskin.json"));
         VisUI.load(skin);
     }
 
@@ -197,18 +168,37 @@ public class App extends LmlApplicationListener {
         return true;
     }
 
+    //region accessors
     public I18NBundle getI18NBundle() { return strings; }
     public OutputFormatService getOutputFormatService() { return outputFormatService; }
     public TextureRegion getRegion() { return region; }
     public EventDispatcher getEventDispatcher() { return eventDispatcher; }
     public ModelService getModelService() { return modelService; }
     public Stage getStage() {return stage;}
-
     public Batch getBatch() {
         return batch;
     }
-
     public Viewport getViewport() { return viewport;}
+    //endregion
+
+
+    @Override
+    public void dispose() {
+        GlobalActions.saveDirPrefs();
+
+        // calls dispose() on each stored view
+        super.dispose();
+
+        batch.dispose();
+
+        cMove.dispose();
+        cResize_ne.dispose();
+        cResize_nw.dispose();
+
+        region.getTexture().dispose();
+
+        VisUI.dispose();
+    }
 
 
     public void setCursor(int cursor) {
@@ -240,24 +230,6 @@ public class App extends LmlApplicationListener {
         }
     }
 
-
-
-
-    @Override
-    public void dispose() {
-        // calls dispose() on each stored view
-        super.dispose();
-
-
-        batch.dispose();
-        cMove.dispose();
-        cResize_ne.dispose();
-        cResize_nw.dispose();
-
-        region.getTexture().dispose();
-
-        VisUI.dispose();
-    }
 
     static public class CursorStyle {
         static public final int HorizontalResize = 1;

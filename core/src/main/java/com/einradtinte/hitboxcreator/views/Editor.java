@@ -44,21 +44,11 @@ public class Editor extends Stack {
     private final Rectangle widgetAreaBounds = new Rectangle();
     private final Rectangle scissorBounds = new Rectangle();
 
-    private PopupMenu popupMenu;
+
 
     public Editor(Skin skin) {
 
-        // Editor popupMenu to center its content
-        popupMenu = new PopupMenu();
-        String text = App.inst().getI18NBundle().format("menuItemCanvas");
-        MenuItem menuItem = new MenuItem(text);
-        menuItem.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent changeEvent, Actor actor) {
-                group.centerOnParent();
-            }
-        });
-        popupMenu.addItem(menuItem);
+
 
 
         // Layout
@@ -79,9 +69,6 @@ public class Editor extends Stack {
                         infoPanel.setZoomLevel(percentage);
                     }
                 });
-                // Todo: Editor right click menu recieves the click too, although a HitShape answers that click
-                // both menus would overlay each other so I have to do without
-                //canvasHolder.addListener(popupMenu.getDefaultInputListener());
 
                 addActor(canvasHolder);
                 group = canvasHolder.getScaleGroup();

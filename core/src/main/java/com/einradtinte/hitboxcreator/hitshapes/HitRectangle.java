@@ -1,11 +1,14 @@
 package com.einradtinte.hitboxcreator.hitshapes;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.PolygonRegion;
 import com.badlogic.gdx.graphics.g2d.PolygonSprite;
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
@@ -22,6 +25,11 @@ public class HitRectangle extends HitShape {
 
     private Vector2 tmpV = new Vector2();
     private short[] triangles = {0,1,2, 0,2,3};
+
+    private float minWidth = 2, minHeight = 2;
+
+    // for selection detection
+    private Rectangle tmpRec = new Rectangle();
 
     // Order in which attributes get passed
     public static ArrayList<String> attributes = new ArrayList<>(Arrays.asList("X", "Y", "WIDTH", "HEIGHT"));
@@ -54,65 +62,41 @@ public class HitRectangle extends HitShape {
 
 
     @Override
-    void initListener() {
-        addListener(new HitShapeInputListener() {
+    boolean mouseMoved(float x, float y) {
+        selection = 0;
 
+        if (isSelected || (x > grabArea && x < getWidth()-grabArea && y > grabArea && y < getHeight()-grabArea)) {
+            selection = Selection.move;
+            highlightBorder();
+            return true;
+        }
+        if (-grabArea < x && x < grabArea) selection = Selection.left;
+        else if (getWidth()-grabArea < x && x < getWidth()+grabArea) selection = Selection.right;
+        if (-grabArea < y && y < grabArea) selection = selection | Selection.bottom;
+        else if (getHeight()-grabArea < y && y < getHeight()+grabArea) selection = selection | Selection.top;
+        highlightBorder();
+        return true;
+    }
 
-            @Override
-            public boolean mouseMoved(InputEvent event, float x, float y) {
-                selection = 0;
-
-                if (x > grabArea && x < getWidth()-grabArea && y > grabArea && y < getHeight()-grabArea) {
-                    selection = Selection.move;
-                    highlightBorder();
-                    return true;
-                }
-                if (-grabArea < x && x < grabArea) selection = Selection.left;
-                else if (getWidth()-grabArea < x && x < getWidth()+grabArea) selection = Selection.right;
-                if (-grabArea < y && y < grabArea) selection = selection | Selection.bottom;
-                else if (getHeight()-grabArea < y && y < getHeight()+grabArea) selection = selection | Selection.top;
-                highlightBorder();
-                return true;
-            }
-
-
-
-            @Override
-            public void touchDragged(InputEvent event, float x, float y, int pointer) {
-                float dx = x - lastPos.x;
-                float dy = y - lastPos.y;
-                // when the object moves we have to take this into account for next dx/dy
-                float mx = 0, my = 0;
-                // we only want to move in whole pixels not in fractions
-                float dxp = Math.round(dx), dyp = Math.round(dy);
-
-                if ((selection & Selection.move) != 0) {
-                    moveBy(dxp, dyp);
-                    mx = dxp;
-                    my = dyp;
-                }
-                if ((selection & Selection.left) != 0 && getWidth() - dxp >= 2) {
-                    moveBy(dxp, 0);
-                    setWidth(getWidth() - dxp);
-                    mx = dxp;
-                }
-                if ((selection & Selection.right) != 0 && getWidth() + dxp >= 2) {
-                    setWidth(getWidth() + dxp);
-                }
-                if ((selection & Selection.top) != 0 && getHeight() + dyp >= 2) {
-                    setHeight(getHeight() + dyp);
-                }
-                if ((selection & Selection.bottom) != 0 && getHeight() - dyp >= 2) {
-                    moveBy(0, dyp);
-                    setHeight(getHeight() - dyp);
-                    my = dyp;
-                }
-
-
-                somethingChanged();
-                lastPos.set(x-mx-(dx-dxp), y-my-(dy-dyp));
-            }
-        });
+    @Override
+    void touchDragged(Vector2 lastXY, float dxp, float dyp) {
+        if ((selection & Selection.move) != 0) {
+            moveBy(dxp, dyp);
+        }
+        if ((selection & Selection.left) != 0 && getWidth() - dxp >= minWidth) {
+            moveBy(dxp, 0);
+            setWidth(getWidth() - dxp);
+        }
+        if ((selection & Selection.right) != 0 && getWidth() + dxp >= minWidth) {
+            setWidth(getWidth() + dxp);
+        }
+        if ((selection & Selection.top) != 0 && getHeight() + dyp >= minHeight) {
+            setHeight(getHeight() + dyp);
+        }
+        if ((selection & Selection.bottom) != 0 && getHeight() - dyp >= minHeight) {
+            moveBy(0, dyp);
+            setHeight(getHeight() - dyp);
+        }
     }
 
     @Override
@@ -123,6 +107,12 @@ public class HitRectangle extends HitShape {
     @Override
     boolean contains(float x, float y) {
         return x >= -grabArea && x < getWidth()+grabArea && y >= -grabArea && y < getHeight()+grabArea;
+    }
+
+    @Override
+    public boolean contains(Rectangle rec) {
+        tmpRec.set(getX(), getY(), getWidth(), getHeight());
+        return tmpRec.overlaps(rec);
     }
 
     @Override

@@ -5,7 +5,11 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.PolygonRegion;
 import com.badlogic.gdx.graphics.g2d.PolygonSprite;
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
+import com.badlogic.gdx.math.Circle;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Json;
@@ -24,6 +28,9 @@ public class HitCircle extends HitShape {
     private double angle;
     private int borderArea;
     private final float minRadius = 5;
+
+    // for selection detection
+    private Circle tmpCircle = new Circle();
 
     // Order in which attributes get passed
     public static ArrayList<String> attributes = new ArrayList<>(Arrays.asList("X", "Y", "RADIUS"));
@@ -65,64 +72,49 @@ public class HitCircle extends HitShape {
     }
 
 
+
     @Override
-    void initListener() {
-        addListener(new HitShapeInputListener() {
+    boolean mouseMoved(float x, float y) {
+        selection = 0;
+        float dx = radius - x;
+        float dy = radius - y;
+        double q = Math.sqrt(dx * dx + dy * dy);
+
+        selection = (isSelected || (q <= (radius - grabArea))) ? Selection.move : Selection.border;
 
 
-            @Override
-            public boolean mouseMoved(InputEvent event, float x, float y) {
-                selection = 0;
-                float dx = radius - x;
-                float dy = radius - y;
-                double q = Math.sqrt(dx * dx + dy * dy);
+        angle = Math.toDegrees(Math.atan2(dx, dy)) + 180;
 
-                selection = (q <= (radius - grabArea)) ? Selection.move : Selection.border;
-
-
-                angle = Math.toDegrees(Math.atan2(dx, dy)) + 180;
-
-                if (angle >= 340 || angle < 20) borderArea = top;
-                else if (angle >= 20 && angle < 70) borderArea = topRight;
-                else if (angle >= 70 && angle < 110) borderArea = right;
-                else if (angle >= 110 && angle < 160) borderArea = bottomRight;
-                else if (angle >= 160 && angle < 200) borderArea = bottom;
-                else if (angle >= 200 && angle < 250) borderArea = bottomLeft;
-                else if (angle >= 250 && angle < 290) borderArea = left;
-                else if (angle >= 290 && angle < 340) borderArea = topLeft;
+        if (angle >= 340 || angle < 20) borderArea = top;
+        else if (angle >= 20 && angle < 70) borderArea = topRight;
+        else if (angle >= 70 && angle < 110) borderArea = right;
+        else if (angle >= 110 && angle < 160) borderArea = bottomRight;
+        else if (angle >= 160 && angle < 200) borderArea = bottom;
+        else if (angle >= 200 && angle < 250) borderArea = bottomLeft;
+        else if (angle >= 250 && angle < 290) borderArea = left;
+        else if (angle >= 290 && angle < 340) borderArea = topLeft;
 
 
-                highlightBorder();
-                return true;
+        highlightBorder();
+        return true;
+    }
+
+    @Override
+    void touchDragged(Vector2 lastXY, float dxp, float dyp) {
+        if ((selection & Selection.move) != 0) {
+            moveBy(dxp, dyp);
+        }
+        if (selection == Selection.border) {
+            float r = Math.round(Math.sqrt(((lastXY.x+dxp) - radius) * ((lastXY.x+dxp) - radius) + ((lastXY.y+dyp) - radius) * ((lastXY.y+dyp) - radius)));
+            float oldRadius = radius;
+            if (r >= minRadius) {
+                radius = r;
+                setSize(radius * 2, radius * 2);
+                setPosition(getX() + oldRadius, getY() + oldRadius, Align.center);
             }
+        }
 
 
-
-            @Override
-            public void touchDragged(InputEvent event, float x, float y, int pointer) {
-
-                float dx = x - lastPos.x;
-                float dy = y - lastPos.y;
-                // when the object moves we have to take this into account for next dx/dy
-                float mx = 0, my = 0;
-                // we only want to move in whole pixels not in fractions
-                float dxp = Math.round(dx), dyp = Math.round(dy);
-
-                if ((selection & Selection.move) != 0) {
-                    moveBy(dxp, dyp);
-                    mx = dxp;
-                    my = dyp;
-                }
-                if (selection == Selection.border) {
-                    float r = Math.round(Math.sqrt((x-radius)*(x-radius)+(y-radius)*(y-radius)));
-                    float oldRadius = radius;
-                    if (r >= minRadius) {
-                        radius = r;
-                        setSize(radius * 2, radius * 2);
-                        setPosition(getX() + oldRadius, getY() + oldRadius, Align.center);
-                        mx -= r - oldRadius;
-                        my -= r - oldRadius;
-                    }
                     /*
                     // TODO: diagonal resize sets border always on mouse pointer, even if you grabbed slightly beside
                     switch (borderArea) {
@@ -164,12 +156,7 @@ public class HitCircle extends HitShape {
                             break;
                     }
                     */
-                }
 
-                somethingChanged();
-                lastPos.set(x-mx-(dx-dxp), y-my-(dy-dyp));
-            }
-        });
     }
 
     @Override
@@ -212,6 +199,12 @@ public class HitCircle extends HitShape {
         x = radius - x;
         y = radius - y;
         return x * x + y * y <= (radius + grabArea) * (radius + grabArea);
+    }
+
+    @Override
+    public boolean contains(Rectangle rec) {
+        tmpCircle.set(getX() + radius, getY() + radius, radius);
+        return Intersector.overlaps(tmpCircle, rec);
     }
 
     @Override

@@ -53,7 +53,11 @@ public class DesktopLauncher {
             @Override
             public boolean closeRequested() {
                 if (App.inst().getModelService().hasProjectChanged()) {
-                    GlobalActions.showUnsavedChangesDlg(App.inst().getI18NBundle().format("dlgTextUnsavedClose"), "exit");
+                    // check if close dialog already exists so we don't open another one
+                    if (!GlobalActions.hasCloseDlg) {
+                        GlobalActions.showUnsavedChangesDlg(App.inst().getI18NBundle().format("dlgTextUnsavedClose"), "exit");
+                        GlobalActions.hasCloseDlg = true;
+                    }
                     return false;
                 }
                 return true;

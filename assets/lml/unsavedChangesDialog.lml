@@ -9,9 +9,9 @@
     <label id="dlgTextUnsavedChanges" text=""/>
 
     <table tablealign="center" defaultpadright="4" tobuttontable="true" growx="true">
-        <textbutton text="@yes" result="false" id="unsavedChangesYes"/>
-        <textbutton text="@no" result="false" id="unsavedChangesNo"/>
-        <textbutton text="@cancel" result="false"/>
+        <textbutton text="@yes" result="false" id="unsavedChangesYes" onclick="cls"/>
+        <textbutton text="@no" result="false" id="unsavedChangesNo" onclick="cls"/>
+        <textbutton text="@cancel" result="false" onclick="cls"/>
     </table>
 
 </visdialog>

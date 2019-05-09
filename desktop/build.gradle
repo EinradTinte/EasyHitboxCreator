@@ -3,7 +3,7 @@ apply plugin: 'application'
 sourceSets.main.resources.srcDirs += [ rootProject.file('assets').absolutePath ]
 mainClassName = 'DesktopLauncher'
 eclipse.project.name = appName + '-desktop'
-sourceCompatibility = 1.7
+sourceCompatibility = 1.8
 
 dependencies {
   compile project(':core')
@@ -11,6 +11,19 @@ dependencies {
   compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
   compile "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
 }
+
+task deleteJar(type: Delete) {
+  delete 'libs/logmanagementlib.jar'
+}
+
+task createJar(type: Copy) {
+  from('build/intermediates/bundles/release/')
+  into('libs/')
+  include('classes.jar')
+  rename('classes.jar', 'logmanagementlib.jar')
+}
+
+createJar.dependsOn(deleteJar, build)
 
 jar {
   archiveName "${appName}-${version}.jar"

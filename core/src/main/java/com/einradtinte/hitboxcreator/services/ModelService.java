@@ -1,6 +1,7 @@
 package com.einradtinte.hitboxcreator.services;
 
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Json;
 import com.einradtinte.hitboxcreator.App;
@@ -8,6 +9,7 @@ import com.einradtinte.hitboxcreator.events.EventDispatcher;
 import com.einradtinte.hitboxcreator.hitshapes.HitCircle;
 import com.einradtinte.hitboxcreator.hitshapes.HitRectangle;
 import com.einradtinte.hitboxcreator.events.events.ProjectChangedEvent;
+import com.kotcrab.vis.ui.util.dialog.Dialogs;
 
 public class ModelService {
 
@@ -27,10 +29,11 @@ public class ModelService {
     public ProjectModel getProject() { return project; }
 
     public void setProject(ProjectModel projectModel) {
-        if (this.project == projectModel) return;
+        // uncommented because I already set it as project if the imagepath is faulty
+        //if (this.project == projectModel) return;
 
-        projectModel.setEventDispatcher(eventDispatcher);
         this.project = projectModel;
+        project.setEventDispatcher(eventDispatcher);
 
         updateProjectStateHash();
 
@@ -51,6 +54,13 @@ public class ModelService {
         json.addClassTag("hitCircle", HitCircle.class);
         ProjectModel projectModel = json.fromJson(ProjectModel.class, file);
         projectModel.setProjectFile(file);
+        // check if the loaded image path exists
+        if (projectModel.getImage() != null && !Gdx.files.external(projectModel.getImage()).exists()) {
+            Dialogs.showErrorDialog(App.inst().getStage(), App.inst().getI18NBundle().format("dlgTextImageNotExists", projectModel.getImage()));
+            projectModel.setImage(null);
+            this.project = projectModel;
+            saveProjectToFile();
+        }
         setProject(projectModel);
     }
 

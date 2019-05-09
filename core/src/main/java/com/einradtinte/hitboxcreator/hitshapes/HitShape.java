@@ -3,6 +3,7 @@ package com.einradtinte.hitboxcreator.hitshapes;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -10,15 +11,19 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
 import com.einradtinte.hitboxcreator.App;
 import com.einradtinte.hitboxcreator.services.OutputFormat;
+import com.einradtinte.hitboxcreator.views.ScaleGroup;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.MenuItem;
 import com.kotcrab.vis.ui.widget.PopupMenu;
 import com.einradtinte.hitboxcreator.events.EventDispatcher;
 import com.einradtinte.hitboxcreator.events.events.HitShapesChangedEvent;
 import com.einradtinte.hitboxcreator.statehash.StateHashable;
+
+import java.util.ArrayList;
 
 public abstract class HitShape extends Actor implements Json.Serializable, StateHashable {
 
@@ -34,8 +39,9 @@ public abstract class HitShape extends Actor implements Json.Serializable, State
     static float borderWidth = 2;
     float grabArea = 6;
     int selection;
-    boolean isSelected;
+    public boolean isSelected;
     private int selectionSave;
+    private boolean dragging;
 
     TextureRegion region;
     private EventDispatcher eventDispatcher = App.inst().getEventDispatcher();
@@ -44,13 +50,17 @@ public abstract class HitShape extends Actor implements Json.Serializable, State
 
     abstract boolean contains(float x, float y);
 
-    abstract void highlightBorder();
+    public abstract boolean contains(Rectangle rec);
 
-    abstract void initListener();
+    abstract void highlightBorder();
 
     public abstract float[] getData();
 
     public abstract OutputFormat.Type getType();
+
+    abstract boolean mouseMoved(float x, float y);
+
+    abstract void touchDragged(Vector2 lastPos, float x, float y);
 
 
     public static void setColors(Color normalBody, Color selectedBody, Color normalBorder, Color selectedBorder) {
@@ -69,10 +79,9 @@ public abstract class HitShape extends Actor implements Json.Serializable, State
      * The only thing subclasses have to do is setting there attributes and call init().*/
     void init() {
         setRegion();
-        addPopupMenu();
         highlightBorder();
         somethingChanged();
-        initListener();
+        addListener(new HitShapeInputListener());
     }
 
 
@@ -95,6 +104,7 @@ public abstract class HitShape extends Actor implements Json.Serializable, State
 
             @Override
             public void showMenu(Stage stage, float x, float y) {
+                if (!isSelected) unselectAllHitShapes();
                 isSelected = true;
                 highlightBorder();
                 super.showMenu(stage, x, y);
@@ -105,7 +115,7 @@ public abstract class HitShape extends Actor implements Json.Serializable, State
                 new ChangeListener() {
             @Override
             public void changed(ChangeEvent changeEvent, Actor actor) {
-                remove();
+                removeSelected();
             }
         });
         popupMenu.addItem(menuItem);
@@ -131,7 +141,8 @@ public abstract class HitShape extends Actor implements Json.Serializable, State
      * Set mouseMoved() and touchDragged()
      */
     class HitShapeInputListener extends InputListener {
-        final Vector2 lastPos = new Vector2();
+        final Vector2 lastXY = new Vector2();
+        Vector2 oldPos = new Vector2();
 
         @Override
         public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
@@ -139,11 +150,6 @@ public abstract class HitShape extends Actor implements Json.Serializable, State
             // the selection will be saved and restored when the cursor enters back on
             selection = selectionSave;
             highlightBorder();
-        }
-
-        @Override
-        public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-            selectionSave = 0;
         }
 
         @Override
@@ -163,17 +169,66 @@ public abstract class HitShape extends Actor implements Json.Serializable, State
                 case Input.Buttons.LEFT:
                     selectionSave = selection;
                     toFront();
-                    lastPos.set(x, y);
+                    PopupMenu.removeEveryMenu(getStage());
+                    if (!HitShape.this.isSelected) unselectAllHitShapes();
+                    lastXY.set(x, y);
+                    oldPos.set(getX(), getY());
+                    dragging = true;
+                    // stop event so that CanvasHolder does not react on it
+                    event.stop();
                     return true;
                 case Input.Buttons.RIGHT:
                     toFront();
-                    return false;
+                    // stop event so that CanvasHolder does not react on it
+                    event.stop();
+                    return true;
                 default:
                     return false;
             }
         }
 
+        @Override
+        public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+            selectionSave = 0;
+            dragging = false;
+            if (button == Input.Buttons.RIGHT && contains(x, y)) {
+                try {
+                    ((ScaleGroup) getParent().getParent()).popupMenu.showMenu(event.getStage(), HitShape.this);
+                } catch (Exception e) {
 
+                }
+            }
+        }
+
+        @Override
+        public void touchDragged(InputEvent event, float x, float y, int pointer) {
+            if (!dragging || selection == 0) return;
+
+            float dx = x - lastXY.x;
+            float dy = y - lastXY.y;
+            float dxp = Math.round(dx), dyp = Math.round(dy);
+
+            if (HitShape.this.isSelected)
+                dragSelected(dxp, dyp);
+            else
+                HitShape.this.touchDragged(lastXY, dxp, dyp);
+            somethingChanged();
+
+            lastXY.x = x + (oldPos.x - getX()) - (dx - dxp);
+            lastXY.y = y + (oldPos.y - getY()) - (dy - dyp);
+            oldPos.set(getX(), getY());
+
+            // mouseMoved does not get called when button is pressed therefore we call it
+            // only difference it makes is updating cursor image on resizing and fluent transition
+            // from side to corner resizing on rectangles
+            // not really a great feature
+            //mouseMoved(null, lastXY.x, lastXY.y);
+        }
+
+        @Override
+        public boolean mouseMoved(InputEvent event, float x, float y) {
+            return HitShape.this.mouseMoved(x, y);
+        }
     }
 
 
@@ -199,5 +254,40 @@ public abstract class HitShape extends Actor implements Json.Serializable, State
     }
 
 
+    public void setSelected(boolean isSelected) {
+        this.isSelected = isSelected;
+        highlightBorder();
+    }
 
+    public static void unselectAllHitShapes() {
+        for (Actor hitshape : App.inst().getModelService().getProject().getHitShapes()) {
+            ((HitShape) hitshape).setSelected(false);
+        }
+    }
+
+    /** Drags all selected HitShapes. */
+    private static void dragSelected(float dxp, float dyp) {
+        Array<HitShape> hitshapes = App.inst().getModelService().getProject().getHitShapes();
+        HitShape hitshape;
+
+        for (int i = 0; i < hitshapes.size; i++) {
+            hitshape = hitshapes.get(i);
+            if (hitshape.isSelected) {
+                hitshape.moveBy(dxp, dyp);
+                hitshape.somethingChanged();
+            }
+
+        }
+    }
+
+    public static void removeSelected() {
+        ArrayList<HitShape> del = new ArrayList<>();
+        for (Actor actor : App.inst().getModelService().getProject().getHitShapes()) {
+            HitShape hitshape = (HitShape) actor;
+            if (hitshape.isSelected)
+                del.add(hitshape);
+        }
+        for (HitShape h : del)
+            h.remove();
+    }
 }

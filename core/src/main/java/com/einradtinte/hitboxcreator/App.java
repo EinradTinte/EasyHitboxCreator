@@ -66,7 +66,33 @@ public class App extends LmlApplicationListener {
 
         batch = new PolygonSpriteBatch();
         viewport = new ScreenViewport();
-        stage = new Stage(viewport, batch);
+        stage = new Stage(viewport, batch) {
+            // we only want to accept one button at a time
+            boolean acceptTouch = true;
+            int buttonPressed;
+
+            @Override
+            public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+
+                if (acceptTouch) {
+                    acceptTouch = false;
+                    buttonPressed = button;
+                    return super.touchDown(screenX, screenY, pointer, button);
+                }
+                else
+                    return true;
+            }
+
+            @Override
+            public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+                if (button == buttonPressed) {
+                    acceptTouch = true;
+                    return super.touchUp(screenX, screenY, pointer, button);
+                }
+                else
+                    return true;
+            }
+        };
 
         init();
 
@@ -84,6 +110,10 @@ public class App extends LmlApplicationListener {
         // File Menu receives a hover event on start up turning it orange. This disappears as soon as the mouse enters the
         // stage. To avoid this behaviour we simulate a mouse movement.
         stage.mouseMoved(100,100);
+
+        // minimizes the visible lag when moving objects
+        // the cursor gets drawn by the OS unlike the rest that lags a few frames behind
+        Gdx.graphics.setVSync(false);
     }
 
 

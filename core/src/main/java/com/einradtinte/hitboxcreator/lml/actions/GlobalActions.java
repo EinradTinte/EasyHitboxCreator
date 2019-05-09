@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.einradtinte.hitboxcreator.hitshapes.HitShape;
 import com.github.czyzby.lml.annotation.LmlAction;
 import com.github.czyzby.lml.parser.LmlParser;
 import com.github.czyzby.lml.parser.action.ActionContainer;
@@ -29,6 +30,13 @@ import java.lang.reflect.Method;
 public class GlobalActions implements ActionContainer {
 
     private static final String DIR_PREFS = "dirPrefs";
+
+
+    public static boolean hasCloseDlg;
+
+
+
+
 
 
     @LmlAction("getScrollOnHover") public static void getScrollOnHover(final Actor scrollPane) {
@@ -87,7 +95,7 @@ public class GlobalActions implements ActionContainer {
         } else openProject();
     }
 
-    private static void openProject() {
+    public static void openProject() {
         FileTypeFilter typeFilter = new FileTypeFilter(false);
         typeFilter.addRule(String.format("Hitbox Project Files (*.%s)", ProjectModel.PROJECT_FILE_EXT), ProjectModel.PROJECT_FILE_EXT);
 
@@ -121,7 +129,7 @@ public class GlobalActions implements ActionContainer {
 
     /** Save project to its filehandle. If no filehandle exists opens saveAs dialog.
      * Accepts a method to invoke after saving. */
-    private static void saveProject(String methodAfter) {
+    public static void saveProject(String methodAfter) {
         if (App.inst().getModelService().getProject().getProjectFile() == null)
             saveProjectAs(methodAfter);
         else {
@@ -138,7 +146,7 @@ public class GlobalActions implements ActionContainer {
         }
     }
 
-    private static void saveProjectAs(String methodAfter) {
+    public static void saveProjectAs(String methodAfter) {
         FileTypeFilter typeFilter = new FileTypeFilter(false);
         typeFilter.addRule(String.format("Hitbox Project Files (*.%s)", ProjectModel.PROJECT_FILE_EXT), ProjectModel.PROJECT_FILE_EXT);
 
@@ -175,6 +183,9 @@ public class GlobalActions implements ActionContainer {
         Gdx.app.exit();
     }
 
+    @LmlAction("cls") void cls() {
+        hasCloseDlg = false;
+    }
 
 
     /** Convenient way to only need on dialog for multiple scenarios.
@@ -211,6 +222,8 @@ public class GlobalActions implements ActionContainer {
                 }
             }
         });
+
+
 
         dlg.show(App.inst().getStage());
     }
